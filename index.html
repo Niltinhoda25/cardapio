@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzaria Reis | Cardápio Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #09090b; color: white; }
+        .logo-site { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fbbf24; object-fit: cover; display: none; margin-right: 12px; }
+        .btn-adm-secreto { position: fixed; top: 15px; right: 15px; z-index: 1000; background: rgba(24, 24, 27, 0.8); color: #3f3f46; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid #27272a; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <a href="admin.html" class="btn-adm-secreto">⚙️</a>
+
+    <div id="login-modal" class="fixed inset-0 bg-red-700 z-[100] flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-zinc-900 p-8 rounded-[2.5rem] text-center border-2 border-zinc-800 shadow-2xl">
+            <h1 class="text-2xl font-black mb-6 italic">PIZZARIA REIS 👑</h1>
+            <input type="text" id="cust-name" placeholder="Seu Nome" class="w-full p-4 rounded-xl text-black font-bold mb-3 outline-none">
+            <input type="text" id="cust-street" placeholder="Rua e Número" class="w-full p-4 rounded-xl text-black font-bold mb-4 outline-none">
+            <button onclick="saveClientData()" class="w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition">ENTRAR NO CARDÁPIO</button>
+        </div>
+    </div>
+
+    <header class="bg-zinc-900 border-b-2 border-red-700 p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <img id="logo-img" src="" class="logo-site">
+                <h1 class="text-lg font-black italic uppercase">Pizzaria Reis</h1>
+            </div>
+            <div id="status-badge" class="font-bold text-[10px]"></div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-8 pb-32">
+        <section>
+            <h3 class="text-red-600 font-black mb-3 uppercase text-sm">1. Escolha o Tamanho</h3>
+            <div id="sizes-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+        </section>
+
+        <section id="flavors-section" class="hidden">
+            <h3 class="text-red-600 font-black mb-3 uppercase text-sm flex justify-between">
+                2. Escolha os Sabores <span id="flavor-count" class="bg-red-600 text-white px-2 rounded">0/0</span>
+            </h3>
+            <div id="flavors-container" class="space-y-2"></div>
+        </section>
+
+        <section id="extras-section" class="hidden">
+            <h3 class="text-red-600 font-black mb-3 uppercase text-sm">3. Bebidas e Bordas</h3>
+            <div id="extras-container" class="space-y-2"></div>
+        </section>
+    </main>
+
+    <div id="cart-bar" class="fixed bottom-0 left-0 right-0 bg-red-700 p-4 z-50 hidden border-t-2 border-red-800">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div>
+                <p id="delivery-text" class="text-[10px] text-white/80 font-bold uppercase"></p>
+                <p id="total-price" class="text-3xl font-black italic">R$ 0,00</p>
+            </div>
+            <button onclick="sendOrder()" class="bg-white text-red-700 px-6 py-3 rounded-xl font-black active:scale-95 transition">ENVIAR PEDIDO</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

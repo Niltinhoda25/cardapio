@@ -1,0 +1,8 @@
+body { background-color: #09090b; }
+.input-premium { @apply w-full bg-white p-4 rounded-xl text-lg outline-none border-4 border-transparent focus:border-red-500; }
+.titulo-secao { @apply text-2xl font-black text-red-600 uppercase mb-6 flex items-center; }
+.size-card { @apply bg-white text-black p-6 rounded-[2rem] cursor-pointer border-4 border-transparent transition-all; }
+.size-card.selected { @apply border-red-600 scale-105 shadow-2xl; }
+.flavor-card { @apply bg-zinc-900 border-2 border-zinc-800 p-5 rounded-2xl flex items-center justify-between cursor-pointer; }
+.flavor-card.selected { @apply border-red-600 bg-red-900/20; }
+.shadow-glow { box-shadow: 0 0 30px rgba(220, 38, 38, 0.4); }
