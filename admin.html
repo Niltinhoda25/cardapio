@@ -3,91 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administração | Reis Profissional</title>
+    <title>Administração Reis | Sistema Profissional</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #fbbf24; --red: #dc2626; --dark: #09090b; --card: #18181b; --zinc: #27272a; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        #login-adm { max-width: 400px; margin: 100px auto; background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid var(--zinc); text-align: center; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--zinc); padding-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--zinc); position: relative; overflow: hidden; }
-        .card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gold); }
-        h2 { color: var(--gold); font-weight: 900; margin: 0 0 20px; font-size: 18px; text-transform: uppercase; }
-        label { display: block; font-size: 11px; color: #a1a1aa; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--zinc); background: #000; color: #fff; font-family: inherit; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn-gold { background: var(--gold); color: black; }
-        .btn-outline { background: transparent; border: 1px solid var(--zinc); color: #71717a; }
-        .item-row { background: #000; padding: 15px; border-radius: 15px; border: 1px solid var(--zinc); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .item-info b { color: var(--gold); text-transform: uppercase; font-size: 14px; }
-        .item-info p { margin: 0; font-size: 11px; color: #71717a; }
-        .btn-del { width: auto; padding: 8px 15px; font-size: 10px; background: #450a0a; color: #f87171; border: 1px solid #991b1b; }
-        .hidden { display: none; }
+        body { font-family: 'Montserrat', sans-serif; background: #09090b; color: #fff; }
+        .card { background: #18181b; border: 1px solid #27272a; padding: 20px; border-radius: 15px; }
+        .hidden { display: none !important; }
+        input, select, textarea { transition: 0.3s; }
+        input:focus { border-color: #fbbf24 !important; outline: none; }
     </style>
 </head>
-<body>
-    <div id="login-adm">
-        <h1 style="color: white; font-weight: 900;">ADMINISTRAÇÃO 🔐</h1>
-        <input type="email" id="adm-email" placeholder="E-mail">
-        <input type="password" id="adm-pass" placeholder="Senha">
-        <button onclick="fazerLogin()" class="btn-gold">Entrar no Sistema</button>
+<body class="p-4 md:p-10">
+
+    <div id="login-adm" class="max-w-md mx-auto mt-20 p-8 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl text-center">
+        <h1 class="text-3xl font-black mb-2 italic">REIS 👑</h1>
+        <p class="text-zinc-500 text-xs font-bold mb-8 uppercase tracking-widest">Painel de Controle</p>
+        
+        <div class="space-y-4">
+            <input type="email" id="adm-email" class="w-full p-4 bg-black border border-zinc-800 rounded-xl text-sm focus:border-yellow-500" placeholder="E-mail do Administrador">
+            <input type="password" id="adm-pass" class="w-full p-4 bg-black border border-zinc-800 rounded-xl text-sm focus:border-yellow-500" placeholder="Sua Senha">
+            <button onclick="fazerLogin()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl hover:bg-yellow-400 transition-all uppercase italic">
+                Acessar Sistema
+            </button>
+        </div>
     </div>
 
-    <div id="painel-adm" class="container hidden">
-        <div class="header">
-            <h1 style="font-weight: 900; margin:0;">PAINEL DE ADMINISTRAÇÃO 👑</h1>
-            <button onclick="firebase.auth().signOut()" class="btn-outline" style="width: auto; padding: 10px 20px;">Sair</button>
-        </div>
-
-        <div class="grid">
-            <div class="card">
-                <h2>⚙️ Geral & Entrega</h2>
-                <label>Logo URL</label>
-                <input type="text" id="logo-url">
-                <label>Taxa de Entrega Fixa (R$)</label>
-                <input type="number" id="taxa-entrega" step="0.01">
-                <button onclick="salvarConfig()" class="btn-gold">Salvar Configs</button>
+    <div id="painel-adm" class="hidden max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-zinc-800 pb-6 gap-4">
+            <div>
+                <h1 class="text-2xl font-black italic uppercase">Administração Reis 👑</h1>
+                <p class="text-[10px] text-zinc-500 font-bold uppercase">Gerencie sua pizzaria em tempo real</p>
             </div>
-
-            <div class="card">
-                <h2>💰 Preços Pizzas</h2>
-                <label>Pequena (R$)</label> <input type="number" id="p-p" step="0.01">
-                <label>Média (R$)</label> <input type="number" id="p-m" step="0.01">
-                <label>Grande (R$)</label> <input type="number" id="p-g" step="0.01">
-                <button onclick="salvarPrecos()" class="btn-gold">Atualizar Preços</button>
-            </div>
-
-            <div class="card">
-                <h2>🍕 Novo Item</h2>
-                <label>Nome</label>
-                <input type="text" id="n-nome" placeholder="Ex: Chocolate com Morango">
-                <label>Descrição / Ingredientes</label>
-                <textarea id="n-desc" rows="2"></textarea>
-                <label>Preço Adicional</label>
-                <input type="number" id="n-preco" step="0.01" value="0">
-                <label>Categoria</label>
-                <select id="n-tipo">
-                    <option value="pizza">Sabor de Pizza</option>
-                    <option value="borda">Borda Recheada</option>
-                    <option value="bebida">Bebida</option>
-                </select>
-                <button onclick="addItem()" style="background: white; color: black;">Cadastrar</button>
-            </div>
-
-            <div class="card">
-                <h2>📜 Itens Ativos</h2>
-                <div id="itens-container"></div>
+            <div class="flex gap-3">
+                <button id="btn-status-loja" onclick="toggleLoja()" class="px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg transition-all active:scale-95"></button>
+                <button onclick="firebase.auth().signOut()" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg">Sair</button>
             </div>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="card space-y-4">
+                <h2 class="text-yellow-500 font-black uppercase text-xs italic flex items-center gap-2">
+                    <span class="text-lg">⚙️</span> Identidade & Taxas
+                </h2>
+                <div>
+                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase">URL da Logo (Link da Imagem)</label>
+                    <input type="text" id="logo-url" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase">Taxa de Entrega Fixa (R$)</label>
+                    <input type="number" id="taxa-entrega" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs">
+                </div>
+                <div class="pt-2 border-t border-zinc-800">
+                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase text-yellow-500">Cupom Ativo</label>
+                    <input type="text" id="cupom-nome" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs mb-2" placeholder="CÓDIGO (Ex: REIS10)">
+                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase">Valor do Desconto (R$)</label>
+                    <input type="number" id="cupom-valor" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs">
+                </div>
+                <button onclick="salvarGeral()" class="w-full bg-yellow-500 text-black font-black py-3 rounded-xl text-[10px] uppercase hover:bg-yellow-400">Salvar Alterações</button>
+            </div>
+
+            <div class="card space-y-4">
+                <h2 class="text-yellow-500 font-black uppercase text-xs italic flex items-center gap-2">
+                    <span class="text-lg">💰</span> Preços das Pizzas
+                </h2>
+                <div>
+                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase">Pizza Pequena (R$)</label>
+                    <input type="number" id="p-p" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase">Pizza Média (R$)</label>
+                    <input type="number" id="p-m" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase">Pizza Grande (R$)</label>
+                    <input type="number" id="p-g" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs">
+                </div>
+                <button onclick="salvarPrecos()" class="w-full bg-yellow-500 text-black font-black py-3 rounded-xl text-[10px] uppercase hover:bg-yellow-400">Atualizar Preços</button>
+                <p class="text-[9px] text-zinc-600 text-center font-bold">Estes preços servem de base para os tamanhos.</p>
+            </div>
+
+            <div class="card space-y-3">
+                <h2 class="text-blue-500 font-black uppercase text-xs italic flex items-center gap-2">
+                    <span class="text-lg">➕</span> Novo Item no Cardápio
+                </h2>
+                <input type="text" id="n-nome" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs" placeholder="Nome do Produto">
+                <textarea id="n-desc" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs" placeholder="Ingredientes / Detalhes"></textarea>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase">Categoria</label>
+                        <select id="n-tipo" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs">
+                            <option value="pizza">Salgada</option>
+                            <option value="doce">Doce</option>
+                            <option value="borda">Borda</option>
+                            <option value="bebida">Bebida</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase text-blue-400">Chocolate (Se doce)</label>
+                        <select id="n-choco" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs">
+                            <option value="Nenhum">Nenhum</option>
+                            <option value="Preto">Preto</option>
+                            <option value="Branco">Branco</option>
+                            <option value="Misto">Misto</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase">Preço Extra (R$)</label>
+                    <input type="number" id="n-preco" class="w-full p-2.5 bg-black border border-zinc-800 rounded-lg text-xs" placeholder="Só para Bebida/Borda" value="0">
+                </div>
+                
+                <button onclick="addItem()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl text-[10px] uppercase transition-all">
+                    Cadastrar Item Agora
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-12 mb-6 flex items-center justify-between border-b border-zinc-800 pb-4">
+            <h2 class="font-black uppercase italic text-xl">Gerenciar Cardápio</h2>
+            <p class="text-[10px] text-zinc-500 font-bold">Use o botão de pausa se algum item acabar</p>
+        </div>
+        <div id="itens-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            </div>
     </div>
 
     <script>
+        // CONFIGURAÇÃO DO FIREBASE (NÃO MUDAR)
         const firebaseConfig = {
             apiKey: "AIzaSyDP-I5zYn9gVIMgNLFULIQTHypi0CqmlwA",
             authDomain: "pizzaria-reis-173ab.firebaseapp.com",
@@ -100,80 +148,147 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // FUNÇÃO DE LOGIN
         async function fazerLogin() {
             const e = document.getElementById('adm-email').value;
             const s = document.getElementById('adm-pass').value;
-            try { await auth.signInWithEmailAndPassword(e, s); } catch (err) { alert("Acesso negado!"); }
+            if(!e || !s) return alert("Preencha e-mail e senha!");
+            
+            try { 
+                await auth.signInWithEmailAndPassword(e, s); 
+            } catch (err) { 
+                alert("Acesso negado: E-mail ou senha incorretos!"); 
+            }
         }
 
+        // OBSERVAR STATUS DO USUÁRIO
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('login-adm').classList.add('hidden');
                 document.getElementById('painel-adm').classList.remove('hidden');
-                carregar();
+                carregarDadosADM();
             } else {
                 document.getElementById('login-adm').classList.remove('hidden');
                 document.getElementById('painel-adm').classList.add('hidden');
             }
         });
 
-        function carregar() {
-            db.collection('config').doc('identidade').onSnapshot(doc => { 
-                if(doc.exists){ 
-                    document.getElementById('logo-url').value = doc.data().logo; 
-                    document.getElementById('taxa-entrega').value = doc.data().taxa; 
-                } 
+        // CARREGAR TUDO DO BANCO DE DADOS
+        function carregarDadosADM() {
+            // Status da Loja
+            db.collection('config').doc('geral').onSnapshot(doc => {
+                const aberto = doc.exists ? doc.data().aberto : false;
+                const btn = document.getElementById('btn-status-loja');
+                btn.innerText = aberto ? "LOJA ABERTA 🟢" : "LOJA FECHADA 🔴";
+                btn.className = aberto ? "bg-green-600 hover:bg-green-500 px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg" : "bg-red-600 hover:bg-red-500 px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg";
             });
-            db.collection('config').doc('precos').onSnapshot(doc => { 
-                if(doc.exists){ 
-                    document.getElementById('p-p').value = doc.data().p; 
-                    document.getElementById('p-m').value = doc.data().m; 
-                    document.getElementById('p-g').value = doc.data().g; 
-                } 
+
+            // Identidade e Cupom
+            db.collection('config').doc('identidade').onSnapshot(doc => {
+                if(doc.exists) {
+                    document.getElementById('logo-url').value = doc.data().logo || "";
+                    document.getElementById('taxa-entrega').value = doc.data().taxa || 0;
+                    document.getElementById('cupom-nome').value = doc.data().cupomNome || "";
+                    document.getElementById('cupom-valor').value = doc.data().cupomValor || 0;
+                }
             });
+
+            // Preços Base
+            db.collection('config').doc('precos').onSnapshot(doc => {
+                if(doc.exists) {
+                    document.getElementById('p-p').value = doc.data().p || 0;
+                    document.getElementById('p-m').value = doc.data().m || 0;
+                    document.getElementById('p-g').value = doc.data().g || 0;
+                }
+            });
+
+            // Itens do Cardápio
             db.collection('cardapio').orderBy('data','desc').onSnapshot(snap => {
-                const c = document.getElementById('itens-container'); c.innerHTML = "";
+                const container = document.getElementById('itens-container');
+                container.innerHTML = "";
                 snap.forEach(doc => {
                     const i = doc.data();
-                    c.innerHTML += `
-                        <div class="item-row">
-                            <div class="item-info">
-                                <b>${i.nome}</b>
-                                <p>${i.desc || 'Sem descrição'}</p>
+                    const disp = i.disponivel !== false;
+                    container.innerHTML += `
+                        <div class="card flex flex-col justify-between ${!disp ? 'opacity-40 grayscale' : ''}">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <b class="text-xs uppercase leading-tight">${i.nome}</b>
+                                    <span class="text-[8px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-bold uppercase">${i.tipo}</span>
+                                </div>
+                                <p class="text-[9px] text-zinc-500 italic mb-4">${i.chocolate !== 'Nenhum' ? 'Chocolate: '+i.chocolate : (i.desc || 'Sem descrição')}</p>
                             </div>
-                            <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="btn-del">APAGAR</button>
+                            <div class="flex gap-2">
+                                <button onclick="toggleDisponibilidade('${doc.id}', ${disp})" class="text-[9px] font-black uppercase flex-1 p-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 transition-all">
+                                    ${disp ? 'Pausar' : 'Ativar'}
+                                </button>
+                                <button onclick="confirmarExclusao('${doc.id}')" class="text-[9px] font-black uppercase p-2 rounded-lg bg-red-900 text-red-200 hover:bg-red-800">
+                                    Remover
+                                </button>
+                            </div>
                         </div>`;
                 });
             });
         }
 
-        async function salvarConfig() { 
-            await db.collection('config').doc('identidade').set({ 
-                logo: document.getElementById('logo-url').value, 
-                taxa: parseFloat(document.getElementById('taxa-entrega').value) || 0 
-            }); 
-            alert("Configurações de Administração Salvas!"); 
+        // AÇÕES DO ADM
+        async function salvarGeral() {
+            try {
+                await db.collection('config').doc('identidade').set({
+                    logo: document.getElementById('logo-url').value,
+                    taxa: parseFloat(document.getElementById('taxa-entrega').value) || 0,
+                    cupomNome: document.getElementById('cupom-nome').value.toUpperCase().trim(),
+                    cupomValor: parseFloat(document.getElementById('cupom-valor').value) || 0
+                }, {merge: true});
+                alert("Configurações Gerais Salvas!");
+            } catch (e) { alert("Erro ao salvar!"); }
         }
 
-        async function salvarPrecos() { 
-            await db.collection('config').doc('precos').set({ 
-                p: parseFloat(document.getElementById('p-p').value) || 0, 
-                m: parseFloat(document.getElementById('p-m').value) || 0, 
-                g: parseFloat(document.getElementById('p-g').value) || 0 
-            }); 
-            alert("Preços atualizados!"); 
+        async function salvarPrecos() {
+            try {
+                await db.collection('config').doc('precos').set({
+                    p: parseFloat(document.getElementById('p-p').value) || 0,
+                    m: parseFloat(document.getElementById('p-m').value) || 0,
+                    g: parseFloat(document.getElementById('p-g').value) || 0
+                });
+                alert("Preços Atualizados com Sucesso!");
+            } catch (e) { alert("Erro ao salvar preços!"); }
         }
 
-        async function addItem() { 
-            const nome = document.getElementById('n-nome').value;
-            const desc = document.getElementById('n-desc').value;
-            const preco = parseFloat(document.getElementById('n-preco').value) || 0;
-            const tipo = document.getElementById('n-tipo').value;
-            if(!nome) return alert("Digite o nome!");
-            await db.collection('cardapio').add({ nome, desc, preco, tipo, data: new Date() }); 
-            document.getElementById('n-nome').value = "";
-            document.getElementById('n-desc').value = "";
-            alert("Item Adicionado!"); 
+        async function addItem() {
+            const nome = document.getElementById('n-nome').value.trim();
+            if(!nome) return alert("O nome do item é obrigatório!");
+            
+            try {
+                await db.collection('cardapio').add({
+                    nome: nome,
+                    desc: document.getElementById('n-desc').value,
+                    tipo: document.getElementById('n-tipo').value,
+                    chocolate: document.getElementById('n-choco').value,
+                    preco: parseFloat(document.getElementById('n-preco').value) || 0,
+                    disponivel: true,
+                    data: new Date()
+                });
+                document.getElementById('n-nome').value = "";
+                document.getElementById('n-desc').value = "";
+                alert("Item adicionado ao cardápio!");
+            } catch (e) { alert("Erro ao cadastrar!"); }
+        }
+
+        async function toggleLoja() {
+            const doc = await db.collection('config').doc('geral').get();
+            const novoStatus = doc.exists ? !doc.data().aberto : true;
+            await db.collection('config').doc('geral').set({ aberto: novoStatus }, {merge: true});
+        }
+
+        async function toggleDisponibilidade(id, statusAtual) {
+            await db.collection('cardapio').doc(id).update({ disponivel: !statusAtual });
+        }
+
+        function confirmarExclusao(id) {
+            if(confirm("Deseja realmente apagar este item do cardápio?")) {
+                db.collection('cardapio').doc(id).delete();
+            }
         }
     </script>
 </body>
