@@ -11,19 +11,21 @@
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #09090b; color: white; }
         .logo-site { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fbbf24; object-fit: cover; display: none; margin-right: 12px; }
-        .btn-adm-secreto { position: fixed; top: 15px; right: 15px; z-index: 1000; background: rgba(24, 24, 27, 0.8); color: #3f3f46; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid #27272a; font-size: 20px; }
+        .input-cliente { width: 100%; padding: 12px; border-radius: 12px; color: black; font-weight: bold; margin-bottom: 10px; outline: none; }
     </style>
 </head>
 <body>
 
-    <a href="admin.html" class="btn-adm-secreto">⚙️</a>
+    <a href="admin.html" class="fixed top-4 right-4 z-[100] opacity-20 hover:opacity-100 text-xl">⚙️</a>
 
-    <div id="login-modal" class="fixed inset-0 bg-red-700 z-[100] flex items-center justify-center p-4">
-        <div class="w-full max-w-sm bg-zinc-900 p-8 rounded-[2.5rem] text-center border-2 border-zinc-800 shadow-2xl">
-            <h1 class="text-2xl font-black mb-6 italic">PIZZARIA REIS 👑</h1>
-            <input type="text" id="cust-name" placeholder="Seu Nome" class="w-full p-4 rounded-xl text-black font-bold mb-3 outline-none">
-            <input type="text" id="cust-street" placeholder="Rua e Número" class="w-full p-4 rounded-xl text-black font-bold mb-4 outline-none">
-            <button onclick="saveClientData()" class="w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition">ENTRAR NO CARDÁPIO</button>
+    <div id="login-modal" class="fixed inset-0 bg-red-700 z-[110] flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-zinc-900 p-6 rounded-[2rem] border-2 border-zinc-800 shadow-2xl">
+            <h1 class="text-2xl font-black mb-6 italic text-center text-white">PIZZARIA REIS 👑</h1>
+            <input type="text" id="cust-name" placeholder="Seu Nome" class="input-cliente">
+            <input type="text" id="cust-street" placeholder="Rua e Número" class="input-cliente">
+            <input type="text" id="cust-bairro" placeholder="Bairro" class="input-cliente">
+            <input type="text" id="cust-ref" placeholder="Ponto de Referência (Opcional)" class="input-cliente">
+            <button onclick="saveClientData()" class="w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg mt-2">VER CARDÁPIO</button>
         </div>
     </div>
 
@@ -39,30 +41,35 @@
 
     <main class="max-w-4xl mx-auto p-4 space-y-8 pb-32">
         <section>
-            <h3 class="text-red-600 font-black mb-3 uppercase text-sm">1. Escolha o Tamanho</h3>
+            <h3 class="text-red-600 font-black mb-3 uppercase text-sm italic">1. Tamanho</h3>
             <div id="sizes-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
         </section>
 
         <section id="flavors-section" class="hidden">
-            <h3 class="text-red-600 font-black mb-3 uppercase text-sm flex justify-between">
-                2. Escolha os Sabores <span id="flavor-count" class="bg-red-600 text-white px-2 rounded">0/0</span>
+            <h3 class="text-red-600 font-black mb-3 uppercase text-sm flex justify-between italic">
+                2. Sabores <span id="flavor-count" class="bg-red-600 text-white px-2 rounded">0/0</span>
             </h3>
             <div id="flavors-container" class="space-y-2"></div>
         </section>
 
-        <section id="extras-section" class="hidden">
-            <h3 class="text-red-600 font-black mb-3 uppercase text-sm">3. Bebidas e Bordas</h3>
-            <div id="extras-container" class="space-y-2"></div>
+        <section id="bordas-section" class="hidden">
+            <h3 class="text-red-600 font-black mb-3 uppercase text-sm italic">3. Borda (Máx 1)</h3>
+            <div id="bordas-container" class="space-y-2"></div>
+        </section>
+
+        <section id="bebidas-section" class="hidden">
+            <h3 class="text-red-600 font-black mb-3 uppercase text-sm italic">4. Bebidas (Máx 2)</h3>
+            <div id="bebidas-container" class="space-y-2"></div>
         </section>
     </main>
 
     <div id="cart-bar" class="fixed bottom-0 left-0 right-0 bg-red-700 p-4 z-50 hidden border-t-2 border-red-800">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <div>
-                <p id="delivery-text" class="text-[10px] text-white/80 font-bold uppercase"></p>
+                <p id="delivery-text" class="text-[10px] text-white/80 font-bold italic"></p>
                 <p id="total-price" class="text-3xl font-black italic">R$ 0,00</p>
             </div>
-            <button onclick="sendOrder()" class="bg-white text-red-700 px-6 py-3 rounded-xl font-black active:scale-95 transition">ENVIAR PEDIDO</button>
+            <button onclick="sendOrder()" class="bg-white text-red-700 px-6 py-3 rounded-xl font-black">PEDIR NO ZAP</button>
         </div>
     </div>
 
