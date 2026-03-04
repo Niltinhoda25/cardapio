@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL REIS | Gestão Profissional</title>
+    <title>Administração | Reis Profissional</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -12,87 +12,64 @@
         :root { --gold: #fbbf24; --red: #dc2626; --dark: #09090b; --card: #18181b; --zinc: #27272a; }
         body { font-family: 'Montserrat', sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; }
-        
-        /* LOGIN */
         #login-adm { max-width: 400px; margin: 100px auto; background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid var(--zinc); text-align: center; }
-        
-        /* DASHBOARD */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--zinc); padding-bottom: 20px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
-
         .card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--zinc); position: relative; overflow: hidden; }
         .card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gold); }
-        
-        h2 { color: var(--gold); font-weight: 900; margin: 0 0 20px; font-size: 18px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        h2 { color: var(--gold); font-weight: 900; margin: 0 0 20px; font-size: 18px; text-transform: uppercase; }
         label { display: block; font-size: 11px; color: #a1a1aa; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--zinc); background: #000; color: #fff; font-family: inherit; box-sizing: border-box; }
-        input:focus { border-color: var(--gold); outline: none; }
-
         button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .btn-gold { background: var(--gold); color: black; }
-        .btn-gold:hover { background: #f59e0b; transform: translateY(-2px); }
-        .btn-red { background: var(--red); color: white; margin-top: 10px; }
-        .btn-outline { background: transparent; border: 1px solid var(--zinc); color: #71717a; margin-top: 20px; }
-
-        /* LISTA DE PRODUTOS */
-        .product-list { grid-column: 1 / -1; margin-top: 20px; }
+        .btn-outline { background: transparent; border: 1px solid var(--zinc); color: #71717a; }
         .item-row { background: #000; padding: 15px; border-radius: 15px; border: 1px solid var(--zinc); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .item-info b { color: var(--gold); text-transform: uppercase; font-size: 14px; }
         .item-info p { margin: 0; font-size: 11px; color: #71717a; }
         .btn-del { width: auto; padding: 8px 15px; font-size: 10px; background: #450a0a; color: #f87171; border: 1px solid #991b1b; }
-        .badge { font-size: 9px; padding: 2px 8px; border-radius: 5px; background: var(--zinc); color: white; margin-left: 10px; }
-        
         .hidden { display: none; }
     </style>
 </head>
 <body>
-
     <div id="login-adm">
-        <h1 style="color: white; font-weight: 900; margin-bottom: 10px;">REIS ADM 👑</h1>
-        <p style="color: #71717a; font-size: 12px; margin-bottom: 30px;">Área Restrita ao Proprietário</p>
-        <input type="email" id="adm-email" placeholder="E-mail do Patrão">
-        <input type="password" id="adm-pass" placeholder="Senha Secreta">
+        <h1 style="color: white; font-weight: 900;">ADMINISTRAÇÃO 🔐</h1>
+        <input type="email" id="adm-email" placeholder="E-mail">
+        <input type="password" id="adm-pass" placeholder="Senha">
         <button onclick="fazerLogin()" class="btn-gold">Entrar no Sistema</button>
     </div>
 
     <div id="painel-adm" class="container hidden">
         <div class="header">
-            <div>
-                <h1 style="margin:0; font-weight:900;">GESTOR DE VENDAS</h1>
-                <p style="margin:0; font-size:12px; color: var(--gold);">Bem-vindo de volta, Patrão!</p>
-            </div>
+            <h1 style="font-weight: 900; margin:0;">PAINEL DE ADMINISTRAÇÃO 👑</h1>
             <button onclick="firebase.auth().signOut()" class="btn-outline" style="width: auto; padding: 10px 20px;">Sair</button>
         </div>
 
         <div class="grid">
             <div class="card">
-                <h2>⚙️ Identidade & Entrega</h2>
-                <label>Link da Logo (URL)</label>
-                <input type="text" id="logo-url" placeholder="https://...">
+                <h2>⚙️ Geral & Entrega</h2>
+                <label>Logo URL</label>
+                <input type="text" id="logo-url">
                 <label>Taxa de Entrega Fixa (R$)</label>
                 <input type="number" id="taxa-entrega" step="0.01">
-                <button onclick="salvarConfig()" class="btn-gold">Salvar Alterações</button>
+                <button onclick="salvarConfig()" class="btn-gold">Salvar Configs</button>
             </div>
 
             <div class="card">
-                <h2>💰 Preços das Pizzas</h2>
-                <div style="display: flex; gap: 10px;">
-                    <div><label>Pequena</label><input type="number" id="p-p" step="0.01"></div>
-                    <div><label>Média</label><input type="number" id="p-m" step="0.01"></div>
-                    <div><label>Grande</label><input type="number" id="p-g" step="0.01"></div>
-                </div>
-                <button onclick="salvarPrecos()" class="btn-gold">Atualizar Tabela</button>
+                <h2>💰 Preços Pizzas</h2>
+                <label>Pequena (R$)</label> <input type="number" id="p-p" step="0.01">
+                <label>Média (R$)</label> <input type="number" id="p-m" step="0.01">
+                <label>Grande (R$)</label> <input type="number" id="p-g" step="0.01">
+                <button onclick="salvarPrecos()" class="btn-gold">Atualizar Preços</button>
             </div>
 
             <div class="card">
-                <h2>🍕 Adicionar ao Cardápio</h2>
-                <label>Nome do Item</label>
-                <input type="text" id="n-nome" placeholder="Ex: Coca-Cola 2L">
+                <h2>🍕 Novo Item</h2>
+                <label>Nome</label>
+                <input type="text" id="n-nome" placeholder="Ex: Chocolate com Morango">
                 <label>Descrição / Ingredientes</label>
                 <textarea id="n-desc" rows="2"></textarea>
-                <label>Preço Adicional (R$)</label>
+                <label>Preço Adicional</label>
                 <input type="number" id="n-preco" step="0.01" value="0">
                 <label>Categoria</label>
                 <select id="n-tipo">
@@ -100,25 +77,12 @@
                     <option value="borda">Borda Recheada</option>
                     <option value="bebida">Bebida</option>
                 </select>
-                <button onclick="addItem()" class="btn-gold" style="background: white; color: black;">Cadastrar Agora</button>
+                <button onclick="addItem()" style="background: white; color: black;">Cadastrar</button>
             </div>
 
             <div class="card">
-                <h2>🛑 Controle de Status</h2>
-                <p style="font-size: 12px; color: #71717a; margin-bottom: 20px;">Defina se a sua pizzaria está aceitando pedidos agora.</p>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="setStatus(true)" id="btn-on" style="background: #16a34a; color: white;">ABRIR LOJA</button>
-                    <button onclick="setStatus(false)" id="btn-off" style="background: #dc2626; color: white;">FECHAR LOJA</button>
-                </div>
-            </div>
-
-            <div class="product-list">
-                <div class="card">
-                    <h2>📜 Cardápio Ativo</h2>
-                    <div id="itens-container">
-                        <p style="text-align: center; color: #71717a;">Carregando produtos...</p>
-                    </div>
-                </div>
+                <h2>📜 Itens Ativos</h2>
+                <div id="itens-container"></div>
             </div>
         </div>
     </div>
@@ -136,105 +100,80 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // 1. LOGIN
         async function fazerLogin() {
             const e = document.getElementById('adm-email').value;
             const s = document.getElementById('adm-pass').value;
-            try {
-                await auth.signInWithEmailAndPassword(e, s);
-            } catch (err) { alert("Senha incorreta, Patrão!"); }
+            try { await auth.signInWithEmailAndPassword(e, s); } catch (err) { alert("Acesso negado!"); }
         }
 
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('login-adm').classList.add('hidden');
                 document.getElementById('painel-adm').classList.remove('hidden');
-                carregarDados();
+                carregar();
             } else {
                 document.getElementById('login-adm').classList.remove('hidden');
                 document.getElementById('painel-adm').classList.add('hidden');
             }
         });
 
-        // 2. CARREGAR DADOS
-        function carregarDados() {
-            // Configs
-            db.collection('config').doc('identidade').onSnapshot(doc => {
-                if(doc.exists) {
-                    document.getElementById('logo-url').value = doc.data().logo || "";
-                    document.getElementById('taxa-entrega').value = doc.data().taxa || 7.00;
-                }
+        function carregar() {
+            db.collection('config').doc('identidade').onSnapshot(doc => { 
+                if(doc.exists){ 
+                    document.getElementById('logo-url').value = doc.data().logo; 
+                    document.getElementById('taxa-entrega').value = doc.data().taxa; 
+                } 
             });
-            // Preços
-            db.collection('config').doc('precos').onSnapshot(doc => {
-                if(doc.exists) {
-                    document.getElementById('p-p').value = doc.data().p;
-                    document.getElementById('p-m').value = doc.data().m;
-                    document.getElementById('p-g').value = doc.data().g;
-                }
+            db.collection('config').doc('precos').onSnapshot(doc => { 
+                if(doc.exists){ 
+                    document.getElementById('p-p').value = doc.data().p; 
+                    document.getElementById('p-m').value = doc.data().m; 
+                    document.getElementById('p-g').value = doc.data().g; 
+                } 
             });
-            // Lista de Produtos (CORRIGIDO)
-            db.collection('cardapio').orderBy('data', 'desc').onSnapshot(snap => {
-                const container = document.getElementById('itens-container');
-                container.innerHTML = "";
-                if(snap.empty) container.innerHTML = "<p style='text-align:center; color:#71717a;'>Nenhum item cadastrado.</p>";
-                
+            db.collection('cardapio').orderBy('data','desc').onSnapshot(snap => {
+                const c = document.getElementById('itens-container'); c.innerHTML = "";
                 snap.forEach(doc => {
-                    const item = doc.data();
-                    container.innerHTML += `
+                    const i = doc.data();
+                    c.innerHTML += `
                         <div class="item-row">
                             <div class="item-info">
-                                <b>${item.nome}</b> <span class="badge">${item.tipo}</span>
-                                <p>${item.desc || 'Sem descrição'} - R$ ${item.preco.toFixed(2)}</p>
+                                <b>${i.nome}</b>
+                                <p>${i.desc || 'Sem descrição'}</p>
                             </div>
-                            <button onclick="removerItem('${doc.id}')" class="btn-del">REMOVER</button>
-                        </div>
-                    `;
+                            <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="btn-del">APAGAR</button>
+                        </div>`;
                 });
             });
         }
 
-        // 3. AÇÕES
-        async function salvarConfig() {
-            const logo = document.getElementById('logo-url').value;
-            const taxa = parseFloat(document.getElementById('taxa-entrega').value) || 0;
-            await db.collection('config').doc('identidade').set({ logo, taxa });
-            alert("Identidade atualizada!");
+        async function salvarConfig() { 
+            await db.collection('config').doc('identidade').set({ 
+                logo: document.getElementById('logo-url').value, 
+                taxa: parseFloat(document.getElementById('taxa-entrega').value) || 0 
+            }); 
+            alert("Configurações de Administração Salvas!"); 
         }
 
-        async function salvarPrecos() {
-            const p = parseFloat(document.getElementById('p-p').value) || 0;
-            const m = parseFloat(document.getElementById('p-m').value) || 0;
-            const g = parseFloat(document.getElementById('p-g').value) || 0;
-            await db.collection('config').doc('precos').set({ p, m, g });
-            alert("Tabela de preços atualizada!");
+        async function salvarPrecos() { 
+            await db.collection('config').doc('precos').set({ 
+                p: parseFloat(document.getElementById('p-p').value) || 0, 
+                m: parseFloat(document.getElementById('p-m').value) || 0, 
+                g: parseFloat(document.getElementById('p-g').value) || 0 
+            }); 
+            alert("Preços atualizados!"); 
         }
 
-        async function setStatus(s) {
-            await db.collection('config').doc('geral').set({ aberto: s });
-            alert(s ? "Loja Aberta!" : "Loja Fechada!");
-        }
-
-        async function addItem() {
+        async function addItem() { 
             const nome = document.getElementById('n-nome').value;
             const desc = document.getElementById('n-desc').value;
             const preco = parseFloat(document.getElementById('n-preco').value) || 0;
             const tipo = document.getElementById('n-tipo').value;
-            if(!nome) return alert("Digite o nome do produto!");
-            
-            await db.collection('cardapio').add({
-                nome, desc, preco, tipo, data: new Date()
-            });
-            
+            if(!nome) return alert("Digite o nome!");
+            await db.collection('cardapio').add({ nome, desc, preco, tipo, data: new Date() }); 
             document.getElementById('n-nome').value = "";
             document.getElementById('n-desc').value = "";
-            alert("Produto cadastrado com sucesso!");
-        }
-
-        async function removerItem(id) {
-            if(confirm("Deseja apagar este item do cardápio?")) {
-                await db.collection('cardapio').doc(id).delete();
-            }
+            alert("Item Adicionado!"); 
         }
     </script>
 </body>
