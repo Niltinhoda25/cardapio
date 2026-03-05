@@ -20,6 +20,7 @@
         .item-card.selected { border-color: #ef4444; background: rgba(239, 68, 68, 0.15); }
         .padding-final { padding-bottom: 280px; }
         input:focus, select:focus { outline: none; border-color: #fbbf24 !important; }
+        .tab-title { font-size: 10px; font-weight: 900; color: #fbbf24; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body class="padding-final">
@@ -35,12 +36,10 @@
     <div id="modal-cliente" class="fixed inset-0 flex items-center justify-center p-5">
         <div class="bg-[#18181b] w-full max-w-md p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
             <h2 class="text-2xl font-black mb-8 text-center italic text-yellow-500 uppercase">BEM-VINDO! 🍕</h2>
-            
             <div class="flex gap-3 mb-6">
                 <button id="btn-entrega" onclick="mudarMetodo('entrega')" class="flex-1 py-4 rounded-2xl font-black text-xs metodo-on">ENTREGA</button>
                 <button id="btn-retirada" onclick="mudarMetodo('retirada')" class="flex-1 py-4 rounded-2xl font-black text-xs metodo-off">RETIRADA</button>
             </div>
-
             <div class="space-y-4">
                 <input type="text" id="c-nome" class="w-full bg-black border border-zinc-800 p-4 rounded-2xl text-sm text-white" placeholder="Seu Nome">
                 <div id="box-endereco">
@@ -63,7 +62,14 @@
                 <h3 class="text-[11px] font-black border-l-4 border-yellow-500 pl-2 uppercase text-zinc-400 italic">2. Escolha os Sabores</h3>
                 <span id="contador-sabores" class="text-[10px] bg-red-600 px-2 py-1 rounded font-bold">0/0</span>
             </div>
-            <div id="lista-sabores" class="space-y-2"></div>
+            
+            <div class="mb-6">
+                <h4 class="tab-title">🍕 Pizzas Salgadas</h4>
+                <div id="lista-sabores-salgados" class="space-y-2 mb-6"></div>
+                
+                <h4 class="tab-title">🍫 Pizzas Doces</h4>
+                <div id="lista-sabores-doces" class="space-y-2"></div>
+            </div>
         </section>
 
         <section id="secao-bordas" class="mt-10 hidden">

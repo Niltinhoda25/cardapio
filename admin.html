@@ -14,6 +14,7 @@
         .btn-add { background: #ef4444; color: #fff; font-weight: 900; padding: 10px; border-radius: 10px; width: 100%; text-transform: uppercase; font-size: 10px; margin-top: 10px; }
         h4 { font-size: 11px; font-weight: 900; color: #fbbf24; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #27272a; padding-bottom: 5px; }
         .status-badge { font-size: 8px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+        select.input-adm { appearance: none; cursor: pointer; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -62,8 +63,8 @@
                 <h4>📢 Promoção (Banner Topo)</h4>
                 <input type="text" id="p-txt" class="input-adm mb-2" placeholder="Texto da Promo">
                 <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="text" id="p-in" class="input-adm" placeholder="Início (Ex: 18:00)">
-                    <input type="text" id="p-out" class="input-adm" placeholder="Fim (Ex: 23:59)">
+                    <input type="text" id="p-in" class="input-adm" placeholder="Início (18:00)">
+                    <input type="text" id="p-out" class="input-adm" placeholder="Fim (23:59)">
                 </div>
                 <input type="color" id="p-cor" class="w-full h-10 rounded cursor-pointer bg-transparent border border-zinc-800 mb-2">
                 <div class="flex gap-2">
@@ -72,28 +73,47 @@
                 </div>
             </div>
 
-            <div class="box border-l-4 border-yellow-500 lg:col-span-2">
-                <h4>⚙️ Configurações do Site</h4>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div class="box border-l-4 border-purple-600">
+                <h4>🎫 Gerenciador de Cupons</h4>
+                <input type="text" id="c-nome" class="input-adm mb-2" placeholder="Código (Ex: REIS10)">
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <input type="number" id="c-valor" class="input-adm" placeholder="Valor R$">
+                    <input type="number" id="c-limite" class="input-adm" placeholder="Limite Usos">
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <input type="text" id="c-val" class="input-adm" placeholder="Validade (Ex: 20/05)">
+                    <select id="c-regra" class="input-adm">
+                        <option value="TUDO">Qualquer Pizza</option>
+                        <option value="MG">Só Média e Grande</option>
+                    </select>
+                </div>
+                <button onclick="criarCupom()" class="w-full bg-purple-600 text-white font-black py-3 rounded-xl uppercase text-[10px]">Criar / Atualizar Cupom</button>
+                <div id="lista-cupons" class="mt-4 space-y-2 max-h-32 overflow-y-auto"></div>
+            </div>
+
+            <div class="box border-l-4 border-yellow-500">
+                <h4>⚙️ Configurações e Preços</h4>
+                <div class="grid grid-cols-2 gap-2 mb-2">
                     <input type="number" id="v-p" class="input-adm" placeholder="Preço P">
                     <input type="number" id="v-m" class="input-adm" placeholder="Preço M">
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
                     <input type="number" id="v-g" class="input-adm" placeholder="Preço G">
                     <input type="number" id="v-taxa" class="input-adm" placeholder="Taxa Entrega">
                 </div>
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <input type="text" id="v-cupom" class="input-adm" placeholder="Código Cupom">
-                    <input type="number" id="v-desc" class="input-adm" placeholder="Valor Desconto R$">
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="salvarConfig()" class="flex-1 bg-yellow-500 text-black py-4 rounded-xl font-black text-xs uppercase">Salvar Configurações</button>
-                    <button id="btn-loja" onclick="toggleLoja()" class="flex-1 py-4 rounded-xl font-black text-xs uppercase text-white"></button>
-                    <input type="color" id="site-cor" onchange="mudarCor(this.value)" class="h-12 w-20 rounded-xl cursor-pointer bg-transparent border border-zinc-800">
+                <div class="flex flex-col gap-2 mt-4">
+                    <button onclick="salvarConfig()" class="w-full bg-yellow-500 text-black py-3 rounded-xl font-black text-xs uppercase">Salvar Preços</button>
+                    <button id="btn-loja" onclick="toggleLoja()" class="w-full py-3 rounded-xl font-black text-xs uppercase text-white"></button>
+                    <div class="flex items-center justify-between bg-black p-2 rounded-xl border border-zinc-800">
+                        <span class="text-[9px] font-bold uppercase text-zinc-500">Cor do Site</span>
+                        <input type="color" id="site-cor" onchange="mudarCor(this.value)" class="h-8 w-12 rounded cursor-pointer bg-transparent border-none">
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="box">
-            <h4>📋 Gerenciar Itens (Pausar ou Excluir)</h4>
+            <h4>📋 Gerenciar Itens Cadastrados</h4>
             <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
     </div>
@@ -136,18 +156,25 @@
             });
 
             db.collection('config').doc('identidade').get().then(doc => {
-                if(doc.exists) {
-                    document.getElementById('v-taxa').value = doc.data().taxa;
-                    document.getElementById('v-cupom').value = doc.data().cupomNome;
-                    document.getElementById('v-desc').value = doc.data().cupomValor;
-                }
+                if(doc.exists) document.getElementById('v-taxa').value = doc.data().taxa;
             });
 
             db.collection('config').doc('geral').onSnapshot(doc => {
                 const aberto = doc.exists ? doc.data().aberto : false;
                 const btn = document.getElementById('btn-loja');
                 btn.innerText = aberto ? "LOJA ABERTA" : "LOJA FECHADA";
-                btn.className = aberto ? "flex-1 bg-green-600 py-4 rounded-xl font-black text-xs uppercase" : "flex-1 bg-red-600 py-4 rounded-xl font-black text-xs uppercase";
+                btn.className = aberto ? "w-full bg-green-600 py-3 rounded-xl font-black text-xs uppercase" : "w-full bg-red-600 py-3 rounded-xl font-black text-xs uppercase";
+            });
+
+            // LISTA DE CUPONS
+            db.collection('cupons').onSnapshot(snap => {
+                document.getElementById('lista-cupons').innerHTML = snap.docs.map(doc => {
+                    const c = doc.data();
+                    return `<div class="bg-black p-2 rounded border border-zinc-800 flex justify-between items-center">
+                        <p class="text-[9px] font-black">${doc.id} (${c.usos}/${c.limite})</p>
+                        <button onclick="db.collection('cupons').doc('${doc.id}').delete()" class="text-red-500 text-[10px]">✕</button>
+                    </div>`;
+                }).join('');
             });
 
             db.collection('cardapio').orderBy('data','desc').onSnapshot(snap => {
@@ -185,8 +212,20 @@
             if(document.getElementById(`${pref}-preco`)) document.getElementById(`${pref}-preco`).value = '';
         }
 
-        async function toggleItem(id, s) { await db.collection('cardapio').doc(id).update({ disponivel: !s }); }
+        async function criarCupom() {
+            const nome = document.getElementById('c-nome').value.toUpperCase().trim();
+            const valor = parseFloat(document.getElementById('c-valor').value);
+            const limite = parseInt(document.getElementById('c-limite').value);
+            const validade = document.getElementById('c-val').value;
+            const regra = document.getElementById('c-regra').value;
 
+            if(!nome || !valor) return alert("Preencha nome e valor!");
+            await db.collection('cupons').doc(nome).set({ valor, limite, validade, regra, usos: 0 });
+            alert("Cupom Criado!");
+            document.getElementById('c-nome').value = '';
+        }
+
+        async function toggleItem(id, s) { await db.collection('cardapio').doc(id).update({ disponivel: !s }); }
         async function setPromo(s) {
             await db.collection('config').doc('promocao').set({
                 texto: document.getElementById('p-txt').value,
@@ -195,13 +234,13 @@
                 cor: document.getElementById('p-cor').value,
                 ativo: s
             });
-            alert("Sucesso!");
+            alert("Marketing Atualizado!");
         }
 
         async function salvarConfig() {
             await db.collection('config').doc('precos').set({ p: parseFloat(document.getElementById('v-p').value)||0, m: parseFloat(document.getElementById('v-m').value)||0, g: parseFloat(document.getElementById('v-g').value)||0 });
-            await db.collection('config').doc('identidade').set({ taxa: parseFloat(document.getElementById('v-taxa').value)||0, cupomNome: document.getElementById('v-cupom').value.toUpperCase(), cupomValor: parseFloat(document.getElementById('v-desc').value)||0 });
-            alert("Salvo!");
+            await db.collection('config').doc('identidade').set({ taxa: parseFloat(document.getElementById('v-taxa').value)||0 });
+            alert("Preços Atualizados!");
         }
 
         async function toggleLoja() {
