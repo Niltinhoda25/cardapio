@@ -1,3 +1,4 @@
+// CONFIGURAÇÃO DO FIREBASE (Verifique se estas são suas chaves atuais)
 const firebaseConfig = {
     apiKey: "AIzaSyDP-I5zYn9gVIMgNLFULIQTHypi0CqmlwA",
     authDomain: "pizzaria-reis-173ab.firebaseapp.com",
@@ -6,161 +7,306 @@ const firebaseConfig = {
     messagingSenderId: "1051814435008",
     appId: "1:1051814435008:web:a596d3d67d7360e8fab525"
 };
-firebase.initializeApp(firebaseConfig);
+
+// Inicializa o Firebase se ainda não foi inicializado
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
-let metodoEnvio = "entrega";
-let cliente = {};
-let pedido = { tamanho: "", maxSabores: 0, sabores: [], borda: null, bebidas: [], total: 0, valorPizza: 0, desconto: 0 };
-let precosDB = { p: 0, m: 0, g: 0, taxa: 0, cupomNome: "", cupomValor: 0 };
+// VARIÁVEIS GLOBAIS DO PEDIDO
+let mEnvio = 'entrega';
+let pedido = { 
+    tamanho: '', 
+    max: 0, 
+    valorPizza: 0, 
+    sabores: [], 
+    borda: null, 
+    bebidas: [], 
+    total: 0, 
+    desc: 0 
+};
+let precosDB = { p: 0, m: 0, g: 0, taxa: 0, cupomNome: '', cupomValor: 0 };
 let cardapioGeral = [];
 let lojaAberta = false;
 
+// FUNÇÃO DE INICIALIZAÇÃO
 function init() {
-    db.collection('config').doc('geral').onSnapshot(doc => {
-        lojaAberta = doc.exists ? doc.data().aberto : false;
-        document.getElementById('status-badge').innerHTML = lojaAberta ? '<span class="text-green-500">🟢 ABERTO</span>' : '<span class="text-red-500">🔴 FECHADO</span>';
-    });
-    db.collection('config').doc('identidade').onSnapshot(doc => {
-        if(doc.exists) {
-            precosDB.taxa = doc.data().taxa || 0;
-            precosDB.cupomNome = doc.data().cupomNome || "";
-            precosDB.cupomValor = doc.data().cupomValor || 0;
-            atualizarTotal();
+    // 1. Analytics - Contador de Visitas
+    db.collection('analytics').doc('geral').set({ 
+        visitas: firebase.firestore.FieldValue.increment(1) 
+    }, { merge: true });
+
+    // 2. Monitorar Cor Global do Site
+    db.collection('config').doc('visual').onSnapshot(doc => {
+        if(doc.exists && doc.data().corFundo) {
+            document.documentElement.style.setProperty('--bg-site', doc.data().corFundo);
         }
     });
-    db.collection('config').doc('precos').onSnapshot(doc => {
-        if(doc.exists) { precosDB.p = doc.data().p; precosDB.m = doc.data().m; precosDB.g = doc.data().g; }
+
+    // 3. Monitorar Banner de Promoção
+    db.collection('config').doc('promocao').onSnapshot(doc => {
+        const banner = document.getElementById('banner-promo');
+        if(!banner) return;
+        if(doc.exists && doc.data().ativo) {
+            const p = doc.data();
+            const agora = new Date();
+            const horaAtual = agora.getHours().toString().padStart(2,'0') + ":" + agora.getMinutes().toString().padStart(2,'0');
+            
+            if(horaAtual >= p.inicio && horaAtual <= p.fim) {
+                banner.innerText = p.texto; 
+                banner.style.backgroundColor = p.cor; 
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        } else {
+            banner.classList.add('hidden');
+        }
     });
-    db.collection('cardapio').orderBy('data', 'asc').onSnapshot(snap => {
+
+    // 4. Status da Loja (Aberto/Fechado)
+    db.collection('config').doc('geral').onSnapshot(doc => {
+        lojaAberta = doc.exists ? doc.data().aberto : false;
+        const statusEl = document.getElementById('status-loja');
+        if(statusEl) {
+            statusEl.innerHTML = lojaAberta ? 
+                '<span class="text-green-500 font-black">● Aberto Agora</span>' : 
+                '<span class="text-red-500 font-black">● Fechado</span>';
+        }
+    });
+
+    // 5. Carregar Preços das Pizzas
+    db.collection('config').doc('precos').onSnapshot(doc => { 
+        if(doc.exists) { 
+            precosDB.p = doc.data().p || 0; 
+            precosDB.m = doc.data().m || 0; 
+            precosDB.g = doc.data().g || 0; 
+        } 
+    });
+
+    // 6. Carregar Taxa e Cupom
+    db.collection('config').doc('identidade').onSnapshot(doc => { 
+        if(doc.exists) { 
+            precosDB.taxa = doc.data().taxa || 0; 
+            precosDB.cupomNome = (doc.data().cupomNome || '').toUpperCase(); 
+            precosDB.cupomValor = doc.data().cupomValor || 0; 
+        } 
+    });
+
+    // 7. Carregar Itens do Cardápio
+    db.collection('cardapio').orderBy('data','asc').onSnapshot(snap => {
         cardapioGeral = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if(pedido.tamanho) renderCardapio();
+        if(pedido.tamanho) renderItens(); // Re-renderiza se já tiver escolhido tamanho
     });
 }
 
-function setMetodo(m) {
-    metodoEnvio = m;
-    document.getElementById('btn-entrega').classList.toggle('method-active', m === 'entrega');
-    document.getElementById('btn-retirada').classList.toggle('method-active', m === 'retirada');
-    document.getElementById('campos-endereco').classList.toggle('hidden', m === 'retirada');
+// MUDAR ENTRE ENTREGA E RETIRADA
+function mudarMetodo(m) {
+    mEnvio = m;
+    const btnE = document.getElementById('btn-entrega');
+    const btnR = document.getElementById('btn-retirada');
+    const boxEnd = document.getElementById('box-endereco');
+
+    if(m === 'entrega') {
+        btnE.className = 'flex-1 py-4 rounded-2xl font-black text-xs metodo-on';
+        btnR.className = 'flex-1 py-4 rounded-2xl font-black text-xs metodo-off';
+        boxEnd.classList.remove('hidden');
+    } else {
+        btnE.className = 'flex-1 py-4 rounded-2xl font-black text-xs metodo-off';
+        btnR.className = 'flex-1 py-4 rounded-2xl font-black text-xs metodo-on';
+        boxEnd.classList.add('hidden');
+    }
     atualizarTotal();
 }
 
-function saveClientData() {
-    const n = document.getElementById('cust-name').value;
-    if(!n) return alert("Digite seu nome.");
-    if(metodoEnvio === 'entrega') {
-        const s = document.getElementById('cust-street').value;
-        const b = document.getElementById('cust-bairro').value;
-        if(!s || !b) return alert("Preencha o endereço.");
-        cliente = { nome: n, endereco: `${s}, ${b}`, ref: document.getElementById('cust-ref').value || "N/A", tipo: "ENTREGA" };
-    } else {
-        cliente = { nome: n, endereco: "RETIRADA NA LOJA", ref: "N/A", tipo: "RETIRADA" };
-    }
-    document.getElementById('login-modal').classList.add('hidden');
-    renderSizes();
+// BOTÃO INICIAL DO MODAL
+function comecar() {
+    const nome = document.getElementById('c-nome').value;
+    if(!nome) { alert("Por favor, digite seu nome!"); return; }
+    document.getElementById('modal-cliente').classList.add('hidden');
+    renderTamanhos();
 }
 
-function renderSizes() {
-    const container = document.getElementById('sizes-container');
-    const tams = [{id:'p', n:'PEQUENA', p:precosDB.p, m:1}, {id:'m', n:'MÉDIA', p:precosDB.m, m:2}, {id:'g', n:'GRANDE', p:precosDB.g, m:3}];
-    container.innerHTML = tams.map(t => `<div onclick="selectSize('${t.id}', ${t.p}, ${t.m})" class="bg-white text-black p-3 rounded-xl text-center font-black">
-        <h4 class="text-[9px] uppercase">${t.n}</h4>
-        <p class="text-red-600 text-[11px] italic">R$ ${t.p.toFixed(2)}</p>
-    </div>`).join('');
+// RENDERIZAR OPÇÕES DE TAMANHO
+function renderTamanhos() {
+    const tams = [
+        {id:'p', n:'PEQUENA', p:precosDB.p, m:1}, 
+        {id:'m', n:'MÉDIA', p:precosDB.m, m:2}, 
+        {id:'g', n:'GRANDE', p:precosDB.g, m:3}
+    ];
+    document.getElementById('lista-tamanhos').innerHTML = tams.map(t => `
+        <div onclick="selecionarTamanho('${t.id}', ${t.p}, ${t.m})" class="bg-white text-black p-4 rounded-2xl text-center shadow-lg active:scale-95 transition-all cursor-pointer">
+            <h4 class="text-[9px] font-black uppercase">${t.n}</h4>
+            <p class="text-red-600 font-black text-xs">R$ ${t.p.toFixed(2)}</p>
+        </div>
+    `).join('');
 }
 
-function selectSize(id, preco, max) {
-    pedido.tamanho = id; pedido.valorPizza = preco; pedido.maxSabores = max;
-    pedido.sabores = []; pedido.borda = null; pedido.bebidas = [];
-    ['flavors-section', 'bordas-section', 'bebidas-section', 'cart-bar'].forEach(s => document.getElementById(s).classList.remove('hidden'));
-    renderCardapio(); atualizarTotal();
-}
+// AO SELECIONAR UM TAMANHO
+function selecionarTamanho(id, preco, max) {
+    pedido.tamanho = id; 
+    pedido.valorPizza = preco; 
+    pedido.max = max; 
+    pedido.sabores = []; // Limpa sabores ao trocar tamanho
 
-function renderCardapio() {
-    const pizzas = cardapioGeral.filter(i => (i.tipo === 'pizza' || i.tipo === 'doce') && i.disponivel !== false);
-    document.getElementById('flavors-container').innerHTML = pizzas.map(s => {
-        const isSelected = pedido.sabores.find(p => p.nome === s.nome);
-        
-        // CORREÇÃO UNDEFINED: Se for doce mostra chocolate, se for salgada mostra descrição
-        let info = s.tipo === 'doce' ? (s.chocolate && s.chocolate !== 'Nenhum' ? `Chocolate: ${s.chocolate}` : (s.desc || "")) : (s.desc || "");
-
-        return `<div onclick="toggleSabor('${s.nome}', '${s.chocolate || 'Nenhum'}')" class="bg-zinc-900 border-2 ${isSelected ? 'border-red-600' : 'border-zinc-800'} p-3 rounded-xl flex justify-between items-center cursor-pointer">
-            <div class="flex-1 pr-2">
-                <p class="font-bold text-[11px] uppercase">${s.nome}</p>
-                <p class="text-[9px] text-zinc-500">${info}</p>
-            </div>
-            <div class="text-red-600 font-black">${isSelected ? '●' : '○'}</div>
-        </div>`;
-    }).join('');
-
-    const bordas = cardapioGeral.filter(i => i.tipo === 'borda' && i.disponivel !== false);
-    document.getElementById('bordas-container').innerHTML = bordas.map(b => `<div onclick="toggleBorda('${b.nome}', ${b.preco})" class="bg-zinc-900 border-2 ${pedido.borda?.nome === b.nome ? 'border-red-600' : 'border-zinc-800'} p-3 rounded-xl flex justify-between items-center mb-2">
-        <span class="text-[10px] uppercase font-bold">${b.nome} (+ R$ ${b.preco.toFixed(2)})</span>
-        <div class="text-red-600 font-black">${pedido.borda?.nome === b.nome ? '●' : '○'}</div>
-    </div>`).join('');
-
-    const bebidas = cardapioGeral.filter(i => i.tipo === 'bebida' && i.disponivel !== false);
-    document.getElementById('bebidas-container').innerHTML = bebidas.map(b => `<div onclick="toggleBebida('${b.nome}', ${b.preco})" class="bg-zinc-900 border-2 ${pedido.bebidas.find(x => x.nome === b.nome) ? 'border-red-600' : 'border-zinc-800'} p-3 rounded-xl flex justify-between items-center mb-2">
-        <span class="text-[10px] uppercase font-bold">${b.nome} (+ R$ ${b.preco.toFixed(2)})</span>
-        <div class="text-red-600 font-black">${pedido.bebidas.find(x => x.nome === b.nome) ? '●' : '○'}</div>
-    </div>`).join('');
-    document.getElementById('flavor-count').innerText = `${pedido.sabores.length}/${pedido.maxSabores}`;
-}
-
-function toggleSabor(nome, choco) {
-    const idx = pedido.sabores.findIndex(p => p.nome === nome);
-    if(idx > -1) pedido.sabores.splice(idx, 1);
-    else if(pedido.sabores.length < pedido.maxSabores) pedido.sabores.push({ nome, chocolate: choco });
-    else alert(`Máximo ${pedido.maxSabores} sabores.`);
-    renderCardapio();
-}
-
-function toggleBorda(nome, preco) {
-    pedido.borda = (pedido.borda?.nome === nome) ? null : { nome, preco: Number(preco) };
-    renderCardapio(); atualizarTotal();
-}
-
-function toggleBebida(nome, preco) {
-    const idx = pedido.bebidas.findIndex(x => x.nome === nome);
-    if(idx > -1) pedido.bebidas.splice(idx, 1);
-    else pedido.bebidas.push({ nome, preco: Number(preco) });
-    renderCardapio(); atualizarTotal();
-}
-
-function aplicarCupom() {
-    const cod = document.getElementById('input-cupom').value.toUpperCase().trim();
-    if(cod === precosDB.cupomNome) { pedido.desconto = precosDB.cupomValor; alert("Cupom OK!"); atualizarTotal(); }
-    else alert("Incorreto.");
-}
-
-function toggleTroco() {
-    document.getElementById('div-troco').classList.toggle('hidden', document.getElementById('pagamento').value !== 'Dinheiro');
-}
-
-function atualizarTotal() {
-    const taxa = (metodoEnvio === 'entrega') ? precosDB.taxa : 0;
-    const pBorda = pedido.borda ? pedido.borda.preco : 0;
-    const pBebida = pedido.bebidas.reduce((s, i) => s + i.preco, 0);
-    pedido.total = (pedido.valorPizza + pBorda + pBebida + taxa) - pedido.desconto;
-    document.getElementById('total-price').innerText = `R$ ${pedido.total.toFixed(2)}`;
-    document.getElementById('delivery-text').innerText = (metodoEnvio === 'entrega') ? `Taxa: R$ ${taxa.toFixed(2)}` : "Retirada";
-}
-
-async function sendOrder() {
-    if(!lojaAberta) return alert("Loja Fechada.");
-    const pag = document.getElementById('pagamento').value;
-    const troco = document.getElementById('troco-para').value;
-    const saboresTexto = pedido.sabores.map(s => `${s.nome}${s.chocolate !== 'Nenhum' ? ' ('+s.chocolate+')' : ''}`).join(' / ');
+    document.getElementById('secao-sabores').classList.remove('hidden');
+    document.getElementById('secao-bordas').classList.remove('hidden');
+    document.getElementById('secao-bebidas').classList.remove('hidden');
+    document.getElementById('barra-pedido').classList.remove('hidden');
     
-    const dadosPedido = {
-        cliente: cliente.nome, endereco: cliente.endereco, referencia: cliente.ref, tipo: cliente.tipo,
-        tamanho: pedido.tamanho.toUpperCase(), sabores: saboresTexto, borda: pedido.borda?.nome || "Sem Borda",
-        bebidas: pedido.bebidas.map(b => b.nome).join(', ') || "Nenhuma", pagamento: pag, trocoPara: troco || 0, total: pedido.total, data: new Date()
-    };
+    renderItens(); 
+    atualizarTotal();
+    
+    // Scroll suave para os sabores
+    document.getElementById('secao-sabores').scrollIntoView({ behavior: 'smooth' });
+}
 
-    await db.collection('pedidos').add(dadosPedido);
-    const msg = `*PEDIDO REIS*%0A*Cliente:* ${cliente.nome}%0A*End:* ${cliente.endereco}%0A*Pizza:* ${pedido.tamanho.toUpperCase()}%0A*Sabores:* ${saboresTexto}%0A*Total:* R$ ${pedido.total.toFixed(2)}`;
+// RENDERIZAR SABORES, BORDAS E BEBIDAS
+function renderItens() {
+    // Sabores (Pizzas e Doces)
+    const sabores = cardapioGeral.filter(i => i.tipo === 'pizza' || i.tipo === 'doce');
+    document.getElementById('lista-sabores').innerHTML = sabores.map(p => {
+        const isSel = pedido.sabores.includes(p.nome);
+        return `
+            <div onclick="toggleSabor('${p.nome}')" class="item-card flex justify-between items-center ${isSel ? 'selected' : ''}">
+                <div>
+                    <p class="text-xs font-black uppercase">${p.nome}</p>
+                    <p class="text-[9px] text-zinc-500">${p.desc || ''}</p>
+                </div>
+                <div class="text-red-600 font-black">${isSel ? '●' : '○'}</div>
+            </div>`;
+    }).join('');
+    document.getElementById('contador-sabores').innerText = `${pedido.sabores.length}/${pedido.max}`;
+
+    // Bordas
+    const bordas = cardapioGeral.filter(i => i.tipo === 'borda');
+    document.getElementById('lista-bordas').innerHTML = bordas.map(b => `
+        <div onclick="setBorda('${b.nome}', ${b.preco})" class="item-card flex justify-between items-center ${pedido.borda?.nome === b.nome ? 'selected' : ''}">
+            <p class="text-[10px] font-black uppercase">${b.nome} (+ R$ ${b.preco.toFixed(2)})</p>
+            <div class="text-red-600 font-black">${pedido.borda?.nome === b.nome ? '●' : '○'}</div>
+        </div>`);
+
+    // Bebidas
+    const drinks = cardapioGeral.filter(i => i.tipo === 'bebida');
+    document.getElementById('lista-bebidas').innerHTML = drinks.map(b => {
+        const isSel = pedido.bebidas.find(x => x.nome === b.nome);
+        return `
+            <div onclick="toggleBebida('${b.nome}', ${b.preco})" class="item-card flex justify-between items-center ${isSel ? 'selected' : ''}">
+                <p class="text-[10px] font-black uppercase">${b.nome} (+ R$ ${b.preco.toFixed(2)})</p>
+                <div class="text-red-600 font-black">${isSel ? '●' : '○'}</div>
+            </div>`;
+    }).join('');
+}
+
+// SELECIONAR SABORES
+function toggleSabor(n) {
+    const idx = pedido.sabores.indexOf(n);
+    if(idx > -1) {
+        pedido.sabores.splice(idx, 1);
+    } else {
+        if(pedido.sabores.length < pedido.max) {
+            pedido.sabores.push(n);
+        } else {
+            alert(`Limite de ${pedido.max} sabor(es) atingido!`);
+        }
+    }
+    renderItens();
+}
+
+// SELECIONAR BORDA
+function setBorda(n, p) {
+    if(pedido.borda?.nome === n) {
+        pedido.borda = null;
+    } else {
+        pedido.borda = { nome: n, preco: p };
+    }
+    renderItens(); 
+    atualizarTotal();
+}
+
+// SELECIONAR BEBIDA
+function toggleBebida(n, p) {
+    const idx = pedido.bebidas.findIndex(x => x.nome === n);
+    if(idx > -1) {
+        pedido.bebidas.splice(idx, 1);
+    } else {
+        pedido.bebidas.push({ nome: n, preco: p });
+    }
+    renderItens(); 
+    atualizarTotal();
+}
+
+// MOSTRAR/OCULTAR TROCO
+function verTroco() {
+    const pag = document.getElementById('select-pag').value;
+    const boxTroco = document.getElementById('box-troco');
+    if(pag === 'Dinheiro') {
+        boxTroco.classList.remove('hidden');
+    } else {
+        boxTroco.classList.add('hidden');
+        document.getElementById('troco-input').value = '';
+    }
+}
+
+// VALIDAR CUPOM
+function validarCupom() {
+    const cod = document.getElementById('cupom-input').value.toUpperCase().trim();
+    if(cod !== "" && cod === precosDB.cupomNome) {
+        pedido.desc = precosDB.cupomValor;
+        alert("Cupom aplicado: R$ " + precosDB.cupomValor.toFixed(2) + " de desconto!");
+    } else {
+        pedido.desc = 0;
+        alert("Cupom inválido.");
+    }
+    atualizarTotal();
+}
+
+// CALCULAR TOTAL
+function atualizarTotal() {
+    const taxa = mEnvio === 'entrega' ? precosDB.taxa : 0;
+    const precoBorda = pedido.borda ? pedido.borda.preco : 0;
+    const precoBebidas = pedido.bebidas.reduce((soma, item) => soma + item.preco, 0);
+    
+    pedido.total = (pedido.valorPizza + precoBorda + precoBebidas + taxa) - pedido.desc;
+    
+    if(pedido.total < 0) pedido.total = 0;
+
+    document.getElementById('txt-total').innerText = "R$ " + pedido.total.toFixed(2);
+    document.getElementById('txt-taxa').innerText = mEnvio === 'entrega' ? "Taxa: R$ " + taxa.toFixed(2) : "Retirada no Local";
+}
+
+// FINALIZAR E ENVIAR WHATSAPP
+function cliqueFinalizar() {
+    if(!lojaAberta) return alert("A loja está fechada agora!");
+    if(pedido.sabores.length === 0) return alert("Escolha o sabor da pizza!");
+    
+    const nome = document.getElementById('c-nome').value;
+    const rua = document.getElementById('c-rua').value;
+    const bairro = document.getElementById('c-bairro').value;
+    const pag = document.getElementById('select-pag').value;
+    const troco = document.getElementById('troco-input').value;
+
+    // Analytics Clique
+    db.collection('analytics').doc('geral').update({ cliques: firebase.firestore.FieldValue.increment(1) });
+
+    let msg = `*NOVO PEDIDO - REIS PIZZARIA*%0A`;
+    msg += `------------------------------%0A`;
+    msg += `*Cliente:* ${nome}%0A`;
+    msg += `*Método:* ${mEnvio.toUpperCase()}%0A`;
+    if(mEnvio === 'entrega') msg += `*Endereço:* ${rua}, ${bairro}%0A`;
+    msg += `------------------------------%0A`;
+    msg += `*Pizza:* ${pedido.tamanho.toUpperCase()}%0A`;
+    msg += `*Sabores:* ${pedido.sabores.join(' / ')}%0A`;
+    if(pedido.borda) msg += `*Borda:* ${pedido.borda.nome}%0A`;
+    if(pedido.bebidas.length > 0) msg += `*Bebidas:* ${pedido.bebidas.map(b => b.nome).join(', ')}%0A`;
+    msg += `------------------------------%0A`;
+    msg += `*Pagamento:* ${pag}${troco ? ' (Troco para R$ ' + troco + ')' : ''}%0A`;
+    if(pedido.desc > 0) msg += `*Desconto:* R$ ${pedido.desc.toFixed(2)}%0A`;
+    msg += `*TOTAL:* R$ ${pedido.total.toFixed(2)}`;
+
     window.open(`https://wa.me/5545999683117?text=${msg}`);
 }
-init();
+
+// INICIA TUDO
+window.onload = init;

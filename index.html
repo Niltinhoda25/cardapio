@@ -2,108 +2,108 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reis Pizzaria | Pedido Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', sans-serif; background-color: #000; color: #fff; -webkit-tap-highlight-color: transparent; }
-        .method-active { background-color: #dc2626 !important; border-color: #dc2626 !important; color: white !important; }
-        .hidden { display: none; }
-        input:focus { border-color: #fbbf24; outline: none; }
-        /* ESPAÇO NO FUNDO PARA AS BEBIDAS NÃO FICAREM ATRÁS DA BARRA */
-        .espaco-final { padding-bottom: 220px; }
+        :root { --bg-site: #000000; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg-site); color: #fff; transition: background 0.8s ease; overflow-x: hidden; }
+        .promo-topo { font-size: 11px; font-weight: 900; text-align: center; padding: 12px; text-transform: uppercase; width: 100%; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .hidden { display: none !important; }
+        /* Bloqueio total do fundo no modal */
+        #modal-cliente { backdrop-filter: blur(25px); z-index: 999; background-color: rgba(0,0,0,0.95); }
+        .metodo-off { border: 2px solid #27272a; color: #52525b; background: transparent; }
+        .metodo-on { border: 2px solid #ef4444; color: #fff; background: #ef4444; }
+        .item-card { background: rgba(255,255,255,0.05); border: 2px solid #27272a; border-radius: 20px; padding: 16px; transition: 0.2s; cursor: pointer; }
+        .item-card.selected { border-color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+        .padding-final { padding-bottom: 280px; }
+        input:focus, select:focus { outline: none; border-color: #fbbf24 !important; }
     </style>
 </head>
-<body class="espaco-final">
+<body class="padding-final">
 
-    <header class="flex flex-col items-center py-6 bg-zinc-900 border-b border-zinc-800 relative">
-        <a href="admin.html" class="absolute top-3 right-3 bg-zinc-800/50 text-[7px] font-bold px-2 py-1.5 rounded-md border border-zinc-700/50 text-zinc-400 uppercase">ADM</a>
-        <h1 class="text-xl font-black italic text-yellow-500 uppercase tracking-tighter">REIS PIZZARIA</h1>
-        <div id="status-badge" class="mt-2 text-[10px] font-bold uppercase tracking-widest">Verificando...</div>
+    <div id="banner-promo" class="promo-topo hidden"></div>
+
+    <header class="flex flex-col items-center py-6 bg-black/40 border-b border-white/5 relative">
+        <a href="admin.html" class="absolute top-3 right-3 text-[8px] bg-white/10 px-2 py-1.5 rounded uppercase font-bold border border-white/5 text-zinc-500">ADM</a>
+        <h1 class="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">REIS PIZZARIA</h1>
+        <div id="status-loja" class="mt-1 text-[9px] font-bold uppercase">Verificando...</div>
     </header>
 
-    <div id="login-modal" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 w-full max-w-md p-6 rounded-3xl border border-zinc-800 shadow-2xl">
-            <h2 class="text-xl font-black mb-6 text-center italic uppercase">Seja Bem-vindo! 🍕</h2>
-            <div class="mb-6">
-                <label class="text-[10px] font-bold text-zinc-500 block mb-2 uppercase text-center">Como deseja receber?</label>
-                <div class="flex gap-2">
-                    <button onclick="setMetodo('entrega')" id="btn-entrega" class="flex-1 py-3 rounded-xl border-2 border-zinc-800 font-bold text-xs method-active">ENTREGA</button>
-                    <button onclick="setMetodo('retirada')" id="btn-retirada" class="flex-1 py-3 rounded-xl border-2 border-zinc-800 font-bold text-xs">RETIRADA</button>
-                </div>
+    <div id="modal-cliente" class="fixed inset-0 flex items-center justify-center p-5">
+        <div class="bg-zinc-900 w-full max-w-md p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
+            <h2 class="text-2xl font-black mb-8 text-center italic text-yellow-500 uppercase">BEM-VINDO! 🍕</h2>
+            
+            <div class="flex gap-3 mb-6">
+                <button id="btn-entrega" onclick="mudarMetodo('entrega')" class="flex-1 py-4 rounded-2xl font-black text-xs metodo-on">ENTREGA</button>
+                <button id="btn-retirada" onclick="mudarMetodo('retirada')" class="flex-1 py-4 rounded-2xl font-black text-xs metodo-off">RETIRADA</button>
             </div>
+
             <div class="space-y-4">
-                <input type="text" id="cust-name" class="w-full bg-black border border-zinc-800 p-3 rounded-xl text-sm" placeholder="Seu Nome">
-                <div id="campos-endereco">
-                    <input type="text" id="cust-street" class="w-full bg-black border border-zinc-800 p-3 rounded-xl text-sm mb-3" placeholder="Rua e número">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="text" id="cust-bairro" class="bg-black border border-zinc-800 p-3 rounded-xl text-sm" placeholder="Bairro">
-                        <input type="text" id="cust-ref" class="bg-black border border-zinc-800 p-3 rounded-xl text-sm" placeholder="Referência">
-                    </div>
+                <input type="text" id="c-nome" class="w-full bg-black border border-zinc-800 p-4 rounded-2xl text-sm text-white" placeholder="Seu Nome">
+                <div id="box-endereco">
+                    <input type="text" id="c-rua" class="w-full bg-black border border-zinc-800 p-4 rounded-2xl text-sm mb-3 text-white" placeholder="Rua e Número">
+                    <input type="text" id="c-bairro" class="w-full bg-black border border-zinc-800 p-4 rounded-2xl text-sm text-white" placeholder="Bairro">
                 </div>
             </div>
-            <button onclick="saveClientData()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl mt-8 uppercase italic">Ver Cardápio</button>
+            <button onclick="comecar()" class="w-full bg-yellow-500 text-black font-black py-5 rounded-2xl mt-8 uppercase italic shadow-lg shadow-yellow-500/20 active:scale-95 transition-all">Ver Cardápio</button>
         </div>
     </div>
 
     <main class="max-w-xl mx-auto p-4">
-        <section id="size-section" class="mt-4">
-            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase italic">1. Tamanho</h3>
-            <div id="sizes-container" class="grid grid-cols-3 gap-2"></div>
+        <section id="secao-tamanhos" class="mt-4">
+            <h3 class="text-[11px] font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase text-zinc-400 italic">1. Escolha o Tamanho</h3>
+            <div id="lista-tamanhos" class="grid grid-cols-3 gap-2"></div>
         </section>
 
-        <section id="flavors-section" class="mt-8 hidden">
+        <section id="secao-sabores" class="mt-10 hidden">
             <div class="flex justify-between items-end mb-4">
-                <h3 class="text-sm font-black border-l-4 border-yellow-500 pl-2 uppercase italic">2. Sabores</h3>
-                <span id="flavor-count" class="text-[10px] bg-red-600 px-2 py-1 rounded font-bold">0/0</span>
+                <h3 class="text-[11px] font-black border-l-4 border-yellow-500 pl-2 uppercase text-zinc-400 italic">2. Escolha os Sabores</h3>
+                <span id="contador-sabores" class="text-[10px] bg-red-600 px-2 py-1 rounded font-bold">0/0</span>
             </div>
-            <div id="flavors-container" class="space-y-2"></div>
+            <div id="lista-sabores" class="space-y-2"></div>
         </section>
 
-        <section id="bordas-section" class="mt-8 hidden">
-            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase italic">3. Borda Recheada?</h3>
-            <div id="bordas-container" class="space-y-2"></div>
+        <section id="secao-bordas" class="mt-10 hidden">
+            <h3 class="text-[11px] font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase text-zinc-400 italic">3. Borda Recheada?</h3>
+            <div id="lista-bordas" class="space-y-2"></div>
         </section>
 
-        <section id="bebidas-section" class="mt-8 hidden">
-            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase italic">4. Bebidas</h3>
-            <div id="bebidas-container" class="space-y-2"></div>
+        <section id="secao-bebidas" class="mt-10 hidden">
+            <h3 class="text-[11px] font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase text-zinc-400 italic">4. Bebidas</h3>
+            <div id="lista-bebidas" class="space-y-2"></div>
         </section>
     </main>
 
-    <div id="cart-bar" class="fixed bottom-0 inset-x-0 bg-zinc-900 border-t border-zinc-800 p-3 hidden z-40">
+    <div id="barra-pedido" class="fixed bottom-0 inset-x-0 bg-zinc-900/95 backdrop-blur-xl border-t border-white/10 p-4 hidden z-[150]">
         <div class="max-w-xl mx-auto">
-            <div class="grid grid-cols-2 gap-2 mb-3">
-                <div class="bg-black/50 p-2 rounded-xl border border-zinc-800">
-                    <label class="text-[7px] font-bold text-zinc-500 uppercase block mb-1">Cupom</label>
-                    <div class="flex gap-1">
-                        <input type="text" id="input-cupom" class="bg-zinc-900 text-white text-[10px] p-1.5 rounded flex-1 uppercase" placeholder="Código">
-                        <button onclick="aplicarCupom()" class="bg-yellow-500 text-black text-[9px] px-2 rounded font-black">OK</button>
-                    </div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="bg-black/40 p-3 rounded-2xl border border-white/5">
+                    <label class="text-[9px] font-black text-zinc-500 uppercase block mb-1">Cupom</label>
+                    <input type="text" id="cupom-input" class="bg-zinc-800 text-white text-xs p-2.5 rounded-xl w-full border-none mb-2 uppercase" placeholder="CÓDIGO">
+                    <button onclick="validarCupom()" class="w-full bg-zinc-700 text-[9px] py-1.5 rounded-lg font-black uppercase text-yellow-500">Aplicar</button>
                 </div>
-                <div class="bg-black/50 p-2 rounded-xl border border-zinc-800">
-                    <label class="text-[7px] font-bold text-zinc-500 uppercase block mb-1">Pagamento</label>
-                    <select id="pagamento" onchange="toggleTroco()" class="bg-zinc-900 text-white text-[10px] p-1.5 rounded w-full border-none">
+                <div class="bg-black/40 p-3 rounded-2xl border border-white/5">
+                    <label class="text-[9px] font-black text-zinc-500 uppercase block mb-1">Pagamento</label>
+                    <select id="select-pag" onchange="verTroco()" class="bg-zinc-800 text-white text-xs p-2.5 rounded-xl w-full border-none">
                         <option value="Pix">Pix</option>
                         <option value="Cartão">Cartão</option>
                         <option value="Dinheiro">Dinheiro</option>
                     </select>
+                    <div id="box-troco" class="hidden mt-2">
+                        <input type="number" id="troco-input" class="bg-zinc-800 text-white text-[10px] p-2 rounded-lg w-full border border-yellow-500/30" placeholder="Troco para?">
+                    </div>
                 </div>
             </div>
-            
-            <div id="div-troco" class="hidden mb-3">
-                <input type="number" id="troco-para" class="w-full bg-black border border-zinc-800 p-2 rounded-xl text-xs text-center" placeholder="Troco para quanto?">
-            </div>
-
-            <div class="flex justify-between items-center gap-3">
+            <div class="flex justify-between items-center gap-4">
                 <div class="flex flex-col">
-                    <span id="delivery-text" class="text-[8px] text-zinc-500 font-bold uppercase">Taxa: R$ 0,00</span>
-                    <span id="total-price" class="text-xl font-black text-yellow-500">R$ 0,00</span>
+                    <span id="txt-taxa" class="text-[10px] text-zinc-500 font-bold uppercase">Taxa: R$ 0,00</span>
+                    <span id="txt-total" class="text-2xl font-black text-yellow-500">R$ 0,00</span>
                 </div>
-                <button onclick="sendOrder()" class="flex-1 bg-red-600 text-white font-black py-3 rounded-xl uppercase text-xs italic shadow-lg active:scale-95 transition-all">Finalizar Pedido</button>
+                <button onclick="cliqueFinalizar()" class="flex-1 bg-red-600 text-white font-black py-4 rounded-2xl uppercase italic text-sm shadow-lg shadow-red-600/30">Finalizar Pedido</button>
             </div>
         </div>
     </div>
