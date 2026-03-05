@@ -13,107 +13,76 @@
         .method-active { background-color: #dc2626 !important; border-color: #dc2626 !important; color: white !important; }
         .hidden { display: none; }
         input:focus { border-color: #fbbf24; outline: none; }
-        /* Estilo para scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
     </style>
 </head>
 <body class="pb-44">
 
     <header class="flex flex-col items-center py-6 bg-zinc-900 border-b border-zinc-800 relative">
-        <a href="admin.html" class="absolute top-4 right-4 bg-zinc-800 hover:bg-zinc-700 text-[8px] font-black px-3 py-2 rounded-lg border border-zinc-700 transition-all flex items-center gap-1">
-            ⚙️ PAINEL ADM
+        <a href="admin.html" class="absolute top-3 right-3 bg-zinc-800/50 hover:bg-zinc-700 text-[7px] font-bold px-2 py-1.5 rounded-md border border-zinc-700/50 transition-all text-zinc-400">
+            ⚙️ ADM
         </a>
-
         <img id="logo-img" src="" alt="Logo" class="h-20 w-20 object-contain mb-2 hidden">
         <h1 class="text-xl font-black italic text-yellow-500 uppercase tracking-tighter">REIS PIZZARIA</h1>
-        <div id="status-badge" class="mt-2 text-[10px] font-bold uppercase tracking-widest">
-            Verificando Loja...
-        </div>
+        <div id="status-badge" class="mt-2 text-[10px] font-bold uppercase tracking-widest">Carregando...</div>
     </header>
 
     <div id="login-modal" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
         <div class="bg-zinc-900 w-full max-w-md p-6 rounded-3xl border border-zinc-800 shadow-2xl">
             <h2 class="text-xl font-black mb-6 text-center italic uppercase">Seja Bem-vindo! 🍕</h2>
-            
             <div class="mb-6">
-                <label class="text-[10px] font-bold text-zinc-500 block mb-2 uppercase">Como deseja seu pedido?</label>
+                <label class="text-[10px] font-bold text-zinc-500 block mb-2 uppercase">Como prefere seu pedido?</label>
                 <div class="flex gap-2">
                     <button onclick="setMetodo('entrega')" id="btn-entrega" class="flex-1 py-3 rounded-xl border-2 border-zinc-800 font-bold text-xs method-active transition-all">ENTREGA</button>
                     <button onclick="setMetodo('retirada')" id="btn-retirada" class="flex-1 py-3 rounded-xl border-2 border-zinc-800 font-bold text-xs transition-all">RETIRADA</button>
                 </div>
             </div>
-
             <div class="space-y-4">
-                <div>
-                    <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase pl-1">Seu Nome</label>
-                    <input type="text" id="cust-name" class="w-full bg-black border border-zinc-800 p-3 rounded-xl text-sm" placeholder="Ex: João da Silva">
-                </div>
-
+                <input type="text" id="cust-name" class="w-full bg-black border border-zinc-800 p-3 rounded-xl text-sm" placeholder="Seu Nome">
                 <div id="campos-endereco">
-                    <div class="mb-3">
-                        <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase pl-1">Endereço</label>
-                        <input type="text" id="cust-street" class="w-full bg-black border border-zinc-800 p-3 rounded-xl text-sm" placeholder="Rua e número">
-                    </div>
+                    <input type="text" id="cust-street" class="w-full bg-black border border-zinc-800 p-3 rounded-xl text-sm mb-3" placeholder="Rua e número">
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase pl-1">Bairro</label>
-                            <input type="text" id="cust-bairro" class="bg-black border border-zinc-800 p-3 rounded-xl text-sm w-full" placeholder="Seu bairro">
-                        </div>
-                        <div>
-                            <label class="text-[9px] font-bold text-zinc-500 block mb-1 uppercase pl-1">Referência</label>
-                            <input type="text" id="cust-ref" class="bg-black border border-zinc-800 p-3 rounded-xl text-sm w-full" placeholder="Ex: Ao lado do mercado">
-                        </div>
+                        <input type="text" id="cust-bairro" class="bg-black border border-zinc-800 p-3 rounded-xl text-sm" placeholder="Bairro">
+                        <input type="text" id="cust-ref" class="bg-black border border-zinc-800 p-3 rounded-xl text-sm" placeholder="Referência">
                     </div>
                 </div>
             </div>
-
-            <button onclick="saveClientData()" id="btn-save-client" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl mt-8 uppercase italic transition-all hover:bg-yellow-400">
-                Ver Cardápio
-            </button>
+            <button onclick="saveClientData()" id="btn-save-client" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl mt-8 uppercase italic hover:bg-yellow-400 transition-all">Ver Cardápio</button>
         </div>
     </div>
 
     <main class="max-w-xl mx-auto p-4">
-        
         <section id="size-section" class="mt-4">
-            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase">1. Escolha o Tamanho</h3>
-            <div id="sizes-container" class="grid grid-cols-3 gap-2">
-                </div>
+            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase italic">1. Tamanho</h3>
+            <div id="sizes-container" class="grid grid-cols-3 gap-2"></div>
         </section>
 
         <section id="flavors-section" class="mt-8 hidden">
             <div class="flex justify-between items-end mb-4">
-                <h3 class="text-sm font-black border-l-4 border-yellow-500 pl-2 uppercase">2. Escolha os Sabores</h3>
-                <span id="flavor-count" class="text-[10px] bg-red-600 px-2 py-1 rounded font-bold uppercase">0/0 Selecionado</span>
+                <h3 class="text-sm font-black border-l-4 border-yellow-500 pl-2 uppercase italic">2. Sabores</h3>
+                <span id="flavor-count" class="text-[10px] bg-red-600 px-2 py-1 rounded font-bold uppercase">0/0</span>
             </div>
-            <div id="flavors-container" class="space-y-2">
-                </div>
+            <div id="flavors-container" class="space-y-2"></div>
         </section>
 
         <section id="bordas-section" class="mt-8 hidden">
-            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase">3. Borda Recheada?</h3>
-            <div id="bordas-container" class="space-y-2">
-                </div>
+            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase italic">3. Borda Recheada?</h3>
+            <div id="bordas-container" class="space-y-2"></div>
         </section>
 
         <section id="bebidas-section" class="mt-8 hidden">
-            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase">4. Bebidas</h3>
-            <div id="bebidas-container" class="space-y-2">
-                </div>
+            <h3 class="text-sm font-black mb-4 border-l-4 border-yellow-500 pl-2 uppercase italic">4. Bebidas</h3>
+            <div id="bebidas-container" class="space-y-2"></div>
         </section>
     </main>
 
-    <div id="cart-bar" class="fixed bottom-0 inset-x-0 bg-zinc-900 border-t border-zinc-800 p-4 hidden z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
+    <div id="cart-bar" class="fixed bottom-0 inset-x-0 bg-zinc-900 border-t border-zinc-800 p-4 hidden z-40">
         <div class="max-w-xl mx-auto">
-            
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <div class="bg-black p-2 rounded-xl border border-zinc-800">
-                    <label class="text-[8px] font-bold text-zinc-500 uppercase block mb-1">Cupom de Desconto</label>
+                    <label class="text-[8px] font-bold text-zinc-500 uppercase block mb-1">Cupom</label>
                     <div class="flex gap-1">
                         <input type="text" id="input-cupom" class="bg-zinc-900 text-white text-[10px] p-2 rounded flex-1 uppercase" placeholder="Código">
-                        <button onclick="aplicarCupom()" class="bg-white text-black text-[9px] px-2 rounded font-black uppercase">Ok</button>
+                        <button onclick="aplicarCupom()" class="bg-white text-black text-[9px] px-2 rounded font-black">OK</button>
                     </div>
                 </div>
                 <div class="bg-black p-2 rounded-xl border border-zinc-800">
@@ -123,18 +92,15 @@
                         <option value="Cartão">Cartão</option>
                         <option value="Dinheiro">Dinheiro</option>
                     </select>
-                    <input type="number" id="troco-para" class="bg-zinc-900 text-white text-[10px] p-2 rounded w-full mt-1 hidden" placeholder="Troco para quanto?">
+                    <input type="number" id="troco-para" class="bg-zinc-900 text-white text-[10px] p-2 rounded w-full mt-1 hidden" placeholder="Quanto em dinheiro?">
                 </div>
             </div>
-
             <div class="flex justify-between items-center gap-4">
                 <div class="flex flex-col">
                     <span id="delivery-text" class="text-[9px] text-zinc-500 font-bold uppercase">Taxa: R$ 0,00</span>
                     <span id="total-price" class="text-xl font-black text-yellow-500">R$ 0,00</span>
                 </div>
-                <button onclick="sendOrder()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl uppercase text-sm italic shadow-lg active:scale-95 transition-all">
-                    Finalizar no WhatsApp
-                </button>
+                <button onclick="sendOrder()" class="flex-1 bg-red-600 text-white font-black py-3 rounded-xl uppercase text-sm italic shadow-lg active:scale-95 transition-all">Finalizar no WhatsApp</button>
             </div>
         </div>
     </div>
