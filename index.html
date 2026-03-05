@@ -13,9 +13,8 @@
         body { font-family: 'Montserrat', sans-serif; background-color: var(--bg-site); color: #fff; transition: background 0.8s ease; overflow-x: hidden; }
         .promo-topo { font-size: 11px; font-weight: 900; text-align: center; padding: 12px; text-transform: uppercase; width: 100%; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .hidden { display: none !important; }
-        /* Bloqueio total do fundo no modal */
-        #modal-cliente { backdrop-filter: blur(25px); z-index: 999; background-color: rgba(0,0,0,0.95); }
-        .metodo-off { border: 2px solid #27272a; color: #52525b; background: transparent; }
+        #modal-cliente { backdrop-filter: blur(25px); z-index: 999; background-color: rgba(0,0,0,0.98); }
+        .metodo-off { border: 2px solid #27272a; color: #52525b; background: rgba(255,255,255,0.05); }
         .metodo-on { border: 2px solid #ef4444; color: #fff; background: #ef4444; }
         .item-card { background: rgba(255,255,255,0.05); border: 2px solid #27272a; border-radius: 20px; padding: 16px; transition: 0.2s; cursor: pointer; }
         .item-card.selected { border-color: #ef4444; background: rgba(239, 68, 68, 0.15); }
@@ -34,7 +33,7 @@
     </header>
 
     <div id="modal-cliente" class="fixed inset-0 flex items-center justify-center p-5">
-        <div class="bg-zinc-900 w-full max-w-md p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
+        <div class="bg-[#18181b] w-full max-w-md p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
             <h2 class="text-2xl font-black mb-8 text-center italic text-yellow-500 uppercase">BEM-VINDO! 🍕</h2>
             
             <div class="flex gap-3 mb-6">
@@ -94,7 +93,7 @@
                         <option value="Dinheiro">Dinheiro</option>
                     </select>
                     <div id="box-troco" class="hidden mt-2">
-                        <input type="number" id="troco-input" class="bg-zinc-800 text-white text-[10px] p-2 rounded-lg w-full border border-yellow-500/30" placeholder="Troco para?">
+                        <input type="number" id="troco-input" class="bg-zinc-800 text-white text-[10px] p-2 rounded-lg w-full border border-yellow-500/30" placeholder="Troco para quanto?">
                     </div>
                 </div>
             </div>
@@ -103,7 +102,7 @@
                     <span id="txt-taxa" class="text-[10px] text-zinc-500 font-bold uppercase">Taxa: R$ 0,00</span>
                     <span id="txt-total" class="text-2xl font-black text-yellow-500">R$ 0,00</span>
                 </div>
-                <button onclick="cliqueFinalizar()" class="flex-1 bg-red-600 text-white font-black py-4 rounded-2xl uppercase italic text-sm shadow-lg shadow-red-600/30">Finalizar Pedido</button>
+                <button onclick="cliqueFinalizar()" class="flex-1 bg-red-600 text-white font-black py-4 rounded-2xl uppercase italic text-sm">Finalizar Pedido</button>
             </div>
         </div>
     </div>

@@ -13,6 +13,7 @@
         .input-adm { background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 10px; width: 100%; font-size: 12px; }
         .btn-add { background: #ef4444; color: #fff; font-weight: 900; padding: 10px; border-radius: 10px; width: 100%; text-transform: uppercase; font-size: 10px; margin-top: 10px; }
         h4 { font-size: 11px; font-weight: 900; color: #fbbf24; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #27272a; padding-bottom: 5px; }
+        .status-badge { font-size: 8px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -21,11 +22,11 @@
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-zinc-900 p-6 rounded-3xl border border-white/5 gap-4">
             <div>
                 <h1 class="text-3xl font-black text-yellow-500 uppercase italic">REIS MASTER 👑</h1>
-                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Painel de Controle Real-Time</p>
+                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Controle Total</p>
             </div>
             <div class="flex gap-6">
                 <div class="text-center"><p class="text-[8px] text-zinc-500 uppercase">Visitas</p><h2 id="ana-visitas" class="text-2xl font-black text-blue-500">0</h2></div>
-                <div class="text-center"><p class="text-[8px] text-zinc-500 uppercase">Vendas (Cliques)</p><h2 id="ana-cliques" class="text-2xl font-black text-green-500">0</h2></div>
+                <div class="text-center"><p class="text-[8px] text-zinc-500 uppercase">Cliques</p><h2 id="ana-cliques" class="text-2xl font-black text-green-500">0</h2></div>
             </div>
         </header>
 
@@ -34,35 +35,35 @@
                 <h4>🍕 Pizza Salgada</h4>
                 <input type="text" id="s-nome" class="input-adm mb-2" placeholder="Nome">
                 <input type="text" id="s-desc" class="input-adm" placeholder="Ingredientes">
-                <button onclick="addProduto('pizza', 's')" class="btn-add">Cadastrar Salgada</button>
+                <button onclick="addProduto('pizza', 's')" class="btn-add">Adicionar Salgada</button>
             </div>
             <div class="box">
                 <h4>🍫 Pizza Doce</h4>
                 <input type="text" id="d-nome" class="input-adm mb-2" placeholder="Nome">
-                <input type="text" id="d-desc" class="input-adm" placeholder="Ex: Chocolate e Morango">
-                <button onclick="addProduto('doce', 'd')" class="btn-add bg-pink-600">Cadastrar Doce</button>
+                <input type="text" id="d-desc" class="input-adm" placeholder="Ex: Chocolate/Morango">
+                <button onclick="addProduto('doce', 'd')" class="btn-add bg-pink-600">Adicionar Doce</button>
             </div>
             <div class="box">
                 <h4>🧀 Bordas</h4>
-                <input type="text" id="b-nome" class="input-adm mb-2" placeholder="Sabor da Borda">
-                <input type="number" id="b-preco" class="input-adm" placeholder="Preço Adicional R$">
-                <button onclick="addProduto('borda', 'b')" class="btn-add bg-yellow-600 text-black">Cadastrar Borda</button>
+                <input type="text" id="b-nome" class="input-adm mb-2" placeholder="Sabor">
+                <input type="number" id="b-preco" class="input-adm" placeholder="Preço R$">
+                <button onclick="addProduto('borda', 'b')" class="btn-add bg-yellow-600 text-black">Adicionar Borda</button>
             </div>
             <div class="box">
                 <h4>🥤 Bebidas</h4>
                 <input type="text" id="be-nome" class="input-adm mb-2" placeholder="Ex: Coca 2L">
                 <input type="number" id="be-preco" class="input-adm" placeholder="Preço R$">
-                <button onclick="addProduto('bebida', 'be')" class="btn-add bg-blue-600">Cadastrar Bebida</button>
+                <button onclick="addProduto('bebida', 'be')" class="btn-add bg-blue-600">Adicionar Bebida</button>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div class="box border-l-4 border-red-600">
                 <h4>📢 Promoção (Banner Topo)</h4>
-                <input type="text" id="p-txt" class="input-adm mb-2" placeholder="Texto do Banner">
+                <input type="text" id="p-txt" class="input-adm mb-2" placeholder="Texto da Promo">
                 <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="time" id="p-in" class="input-adm">
-                    <input type="time" id="p-out" class="input-adm">
+                    <input type="text" id="p-in" class="input-adm" placeholder="Início (Ex: 18:00)">
+                    <input type="text" id="p-out" class="input-adm" placeholder="Fim (Ex: 23:59)">
                 </div>
                 <input type="color" id="p-cor" class="w-full h-10 rounded cursor-pointer bg-transparent border border-zinc-800 mb-2">
                 <div class="flex gap-2">
@@ -72,7 +73,7 @@
             </div>
 
             <div class="box border-l-4 border-yellow-500 lg:col-span-2">
-                <h4>⚙️ Preços, Taxas e Status</h4>
+                <h4>⚙️ Configurações do Site</h4>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                     <input type="number" id="v-p" class="input-adm" placeholder="Preço P">
                     <input type="number" id="v-m" class="input-adm" placeholder="Preço M">
@@ -92,8 +93,8 @@
         </div>
 
         <div class="box">
-            <h4>📋 Gerenciar Itens Cadastrados</h4>
-            <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+            <h4>📋 Gerenciar Itens (Pausar ou Excluir)</h4>
+            <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
     </div>
 
@@ -110,7 +111,6 @@
         const db = firebase.firestore();
 
         function admInit() {
-            // Monitorar Analytics
             db.collection('analytics').doc('geral').onSnapshot(doc => {
                 if(doc.exists) {
                     document.getElementById('ana-visitas').innerText = doc.data().visitas;
@@ -118,7 +118,15 @@
                 }
             });
 
-            // Carregar Configurações Atuais
+            db.collection('config').doc('promocao').onSnapshot(doc => {
+                if(doc.exists) {
+                    document.getElementById('p-txt').value = doc.data().texto || "";
+                    document.getElementById('p-in').value = doc.data().inicio || "";
+                    document.getElementById('p-out').value = doc.data().fim || "";
+                    document.getElementById('p-cor').value = doc.data().cor || "#000000";
+                }
+            });
+
             db.collection('config').doc('precos').get().then(doc => {
                 if(doc.exists) {
                     document.getElementById('v-p').value = doc.data().p;
@@ -126,6 +134,7 @@
                     document.getElementById('v-g').value = doc.data().g;
                 }
             });
+
             db.collection('config').doc('identidade').get().then(doc => {
                 if(doc.exists) {
                     document.getElementById('v-taxa').value = doc.data().taxa;
@@ -134,7 +143,6 @@
                 }
             });
 
-            // Monitorar Loja e Promo
             db.collection('config').doc('geral').onSnapshot(doc => {
                 const aberto = doc.exists ? doc.data().aberto : false;
                 const btn = document.getElementById('btn-loja');
@@ -146,11 +154,22 @@
                 const list = document.getElementById('lista-gerenciar');
                 list.innerHTML = snap.docs.map(doc => {
                     const i = doc.data();
-                    let cor = i.tipo === 'pizza' ? 'text-red-500' : (i.tipo === 'doce' ? 'text-pink-500' : 'text-zinc-500');
-                    return `<div class="bg-black/40 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
-                        <div><p class="text-[9px] font-black uppercase ${cor}">${i.tipo}</p><p class="text-xs font-bold uppercase">${i.nome}</p></div>
-                        <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="text-red-600 font-black text-[9px] hover:underline">X</button>
-                    </div>`;
+                    const status = i.disponivel !== false;
+                    let c = i.tipo === 'pizza' ? 'text-red-500' : (i.tipo === 'doce' ? 'text-pink-500' : 'text-zinc-500');
+                    return `
+                        <div class="bg-black/40 p-4 rounded-xl border ${status ? 'border-zinc-800' : 'border-red-900/50 opacity-60'} flex justify-between items-center">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-[9px] font-black uppercase ${c}">${i.tipo}</p>
+                                    <span class="status-badge ${status ? 'bg-green-600' : 'bg-red-600'}">${status ? 'Ativo' : 'Pausado'}</span>
+                                </div>
+                                <p class="text-xs font-bold uppercase truncate w-32">${i.nome}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="toggleItem('${doc.id}', ${status})" class="text-[8px] font-black uppercase p-2 bg-zinc-800 rounded hover:bg-white hover:text-black transition">${status ? 'Pausar' : 'Ativar'}</button>
+                                <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="text-red-600 font-black p-2">✕</button>
+                            </div>
+                        </div>`;
                 }).join('');
             });
         }
@@ -162,8 +181,11 @@
             if(!nome) return alert("Digite o nome!");
             await db.collection('cardapio').add({ nome, tipo, desc, preco, data: new Date(), disponivel: true });
             document.getElementById(`${pref}-nome`).value = '';
-            alert("Sucesso!");
+            if(document.getElementById(`${pref}-desc`)) document.getElementById(`${pref}-desc`).value = '';
+            if(document.getElementById(`${pref}-preco`)) document.getElementById(`${pref}-preco`).value = '';
         }
+
+        async function toggleItem(id, s) { await db.collection('cardapio').doc(id).update({ disponivel: !s }); }
 
         async function setPromo(s) {
             await db.collection('config').doc('promocao').set({
@@ -173,21 +195,13 @@
                 cor: document.getElementById('p-cor').value,
                 ativo: s
             });
-            alert("Promoção salva!");
+            alert("Sucesso!");
         }
 
         async function salvarConfig() {
-            await db.collection('config').doc('precos').set({ 
-                p: parseFloat(document.getElementById('v-p').value), 
-                m: parseFloat(document.getElementById('v-m').value), 
-                g: parseFloat(document.getElementById('v-g').value) 
-            });
-            await db.collection('config').doc('identidade').set({ 
-                taxa: parseFloat(document.getElementById('v-taxa').value), 
-                cupomNome: document.getElementById('v-cupom').value.toUpperCase(), 
-                cupomValor: parseFloat(document.getElementById('v-desc').value) 
-            });
-            alert("Configs salvas!");
+            await db.collection('config').doc('precos').set({ p: parseFloat(document.getElementById('v-p').value)||0, m: parseFloat(document.getElementById('v-m').value)||0, g: parseFloat(document.getElementById('v-g').value)||0 });
+            await db.collection('config').doc('identidade').set({ taxa: parseFloat(document.getElementById('v-taxa').value)||0, cupomNome: document.getElementById('v-cupom').value.toUpperCase(), cupomValor: parseFloat(document.getElementById('v-desc').value)||0 });
+            alert("Salvo!");
         }
 
         async function toggleLoja() {
