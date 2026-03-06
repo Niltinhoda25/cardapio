@@ -11,13 +11,15 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let mEnvio = 'entrega';
-let pedido = { tamanho:'', max:0, valorPizza:0, sabores:[], borda:null, bebidas:[], total:0, desc:0, cupomAtivo: null };
+let pedido = { tamanho:'', max:0, valorPizza:0, sabores:[], borda:null, bebidas:[], total:0, desc:0, cupomAtivo: null, extraPremium: 0 };
 let precosDB = { p:0, m:0, g:0, taxa:0 };
 let cardapioGeral = [];
 let lojaAberta = false;
 
 function init() {
-    db.collection('analytics').doc('geral').set({ visitas: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+    db.collection('analytics').doc('geral').onSnapshot(doc => {
+        if(doc.exists) { /* Analytics aqui se necessário */ }
+    });
 
     db.collection('config').doc('visual').onSnapshot(doc => {
         if(doc.exists && doc.data().corFundo) document.documentElement.style.setProperty('--bg-site', doc.data().corFundo);
@@ -56,7 +58,6 @@ function mudarMetodo(m) {
     const btnE = document.getElementById('btn-entrega');
     const btnR = document.getElementById('btn-retirada');
     const boxE = document.getElementById('box-endereco');
-
     if(m === 'entrega') {
         btnE.className = 'flex-1 py-4 rounded-2xl font-black text-xs metodo-on';
         btnR.className = 'flex-1 py-4 rounded-2xl font-black text-xs metodo-off';
@@ -85,7 +86,7 @@ function renderTamanhos() {
 }
 
 function selecionarTamanho(id, preco, max) {
-    pedido.tamanho = id; pedido.valorPizza = preco; pedido.max = max; pedido.sabores = [];
+    pedido.tamanho = id; pedido.valorPizza = preco; pedido.max = max; pedido.sabores = []; pedido.extraPremium = 0;
     ['secao-sabores', 'secao-bordas', 'secao-bebidas', 'barra-pedido'].forEach(s => document.getElementById(s).classList.remove('hidden'));
     renderItens(); atualizarTotal();
     document.getElementById('secao-sabores').scrollIntoView({ behavior: 'smooth' });
@@ -94,22 +95,30 @@ function selecionarTamanho(id, preco, max) {
 function renderItens() {
     const ativos = cardapioGeral.filter(i => i.disponivel !== false);
 
-    // RENDERIZANDO SALGADOS
-    const salgados = ativos.filter(i => i.tipo === 'pizza');
-    document.getElementById('lista-sabores-salgados').innerHTML = salgados.map(p => {
-        const isSel = pedido.sabores.includes(p.nome);
-        return `<div onclick="toggleSabor('${p.nome}')" class="item-card flex justify-between items-center ${isSel ? 'selected' : ''}">
+    // RENDER SALGADAS E DOCES COMUNS
+    const salgadas = ativos.filter(i => i.tipo === 'pizza');
+    const doces = ativos.filter(i => i.tipo === 'doce');
+    
+    const renderSabor = (p) => {
+        const isSel = pedido.sabores.find(s => s.nome === p.nome);
+        return `<div onclick="toggleSabor('${p.nome}', ${p.preco || 0})" class="item-card flex justify-between items-center ${isSel ? 'selected' : ''}">
             <div><p class="text-xs font-black uppercase">${p.nome}</p><p class="text-[9px] text-zinc-500">${p.desc || ''}</p></div>
             <div class="text-red-600 font-black">${isSel ? '●' : '○'}</div>
         </div>`;
-    }).join('');
+    };
 
-    // RENDERIZANDO DOCES
-    const doces = ativos.filter(i => i.tipo === 'doce');
-    document.getElementById('lista-sabores-doces').innerHTML = doces.map(p => {
-        const isSel = pedido.sabores.includes(p.nome);
-        return `<div onclick="toggleSabor('${p.nome}')" class="item-card flex justify-between items-center ${isSel ? 'selected' : ''}">
-            <div><p class="text-xs font-black uppercase">${p.nome}</p><p class="text-[9px] text-zinc-500">${p.desc || ''}</p></div>
+    document.getElementById('lista-sabores-salgados').innerHTML = salgadas.map(renderSabor).join('');
+    document.getElementById('lista-sabores-doces').innerHTML = doces.map(renderSabor).join('');
+
+    // RENDER PREMIUM COM ADICIONAL NO TEXTO
+    const premium = ativos.filter(i => i.tipo === 'premium');
+    document.getElementById('lista-sabores-premium').innerHTML = premium.map(p => {
+        const isSel = pedido.sabores.find(s => s.nome === p.nome);
+        return `<div onclick="toggleSabor('${p.nome}', ${p.preco})" class="item-card flex justify-between items-center ${isSel ? 'selected' : ''}">
+            <div>
+                <p class="text-xs font-black uppercase">${p.nome}</p>
+                <p class="text-[9px] text-purple-400 font-bold">+ R$ ${p.preco.toFixed(2)}</p>
+            </div>
             <div class="text-red-600 font-black">${isSel ? '●' : '○'}</div>
         </div>`;
     }).join('');
@@ -133,12 +142,21 @@ function renderItens() {
     }).join('');
 }
 
-function toggleSabor(n) {
-    const idx = pedido.sabores.indexOf(n);
-    if(idx > -1) pedido.sabores.splice(idx, 1);
-    else if(pedido.sabores.length < pedido.max) pedido.sabores.push(n);
-    else alert(`Máximo de ${pedido.max} sabores!`);
+function toggleSabor(nome, extra) {
+    const idx = pedido.sabores.findIndex(s => s.nome === nome);
+    if(idx > -1) {
+        pedido.sabores.splice(idx, 1);
+    } else if(pedido.sabores.length < pedido.max) {
+        pedido.sabores.push({nome, extra});
+    } else {
+        alert(`Máximo de ${pedido.max} sabores!`);
+    }
+    
+    // CALCULA O EXTRA TOTAL (Se for meio a meio, soma as metades dos extras)
+    pedido.extraPremium = pedido.sabores.reduce((acc, obj) => acc + (obj.extra / pedido.max), 0);
+    
     renderItens();
+    atualizarTotal();
 }
 
 function setBorda(n, p) { pedido.borda = (pedido.borda?.nome === n) ? null : {nome: n, preco: p}; renderItens(); atualizarTotal(); }
@@ -156,19 +174,14 @@ function verTroco() {
 async function validarCupom() {
     const cod = document.getElementById('cupom-input').value.toUpperCase().trim();
     if(!cod) return;
-    
     const doc = await db.collection('cupons').doc(cod).get();
-    if(!doc.exists) return alert("Cupom não existe!");
-    
+    if(!doc.exists) return alert("Cupom inválido!");
     const c = doc.data();
     if(c.usos >= c.limite) return alert("Cupom esgotado!");
-    
-    // REGRA DE TAMANHO
-    if(c.regra === 'MG' && pedido.tamanho === 'p') return alert("Este cupom só vale para pizzas Médias ou Grandes!");
-
+    if(c.regra === 'MG' && pedido.tamanho === 'p') return alert("Válido apenas para Média e Grande!");
     pedido.desc = c.valor;
     pedido.cupomAtivo = cod;
-    alert(`Desconto de R$ ${c.valor.toFixed(2)} aplicado!`);
+    alert("Desconto aplicado!");
     atualizarTotal();
 }
 
@@ -176,26 +189,22 @@ function atualizarTotal() {
     const taxa = mEnvio === 'entrega' ? precosDB.taxa : 0;
     const bP = pedido.borda ? pedido.borda.preco : 0;
     const dP = pedido.bebidas.reduce((a, b) => a + b.preco, 0);
-    pedido.total = (pedido.valorPizza + bP + dP + taxa) - pedido.desc;
+    // TOTAL = (Pizza Base + Extra Premium) + Borda + Bebidas + Taxa - Cupom
+    pedido.total = (pedido.valorPizza + pedido.extraPremium + bP + dP + taxa) - pedido.desc;
     document.getElementById('txt-total').innerText = "R$ " + pedido.total.toFixed(2);
     document.getElementById('txt-taxa').innerText = mEnvio === 'entrega' ? "Taxa: R$ " + taxa.toFixed(2) : "Retirada no Local";
 }
 
 async function cliqueFinalizar() {
-    if(!lojaAberta) return alert("A loja está fechada!");
+    if(!lojaAberta) return alert("Loja Fechada!");
     if(pedido.sabores.length === 0) return alert("Escolha o sabor!");
+    if(pedido.cupomAtivo) await db.collection('cupons').doc(pedido.cupomAtivo).update({ usos: firebase.firestore.FieldValue.increment(1) });
     
-    // CONTABILIZA USO DO CUPOM SE TIVER
-    if(pedido.cupomAtivo) {
-        await db.collection('cupons').doc(pedido.cupomAtivo).update({ usos: firebase.firestore.FieldValue.increment(1) });
-    }
-
-    db.collection('analytics').doc('geral').update({ cliques: firebase.firestore.FieldValue.increment(1) });
     const troco = document.getElementById('troco-input').value;
-    let msg = `*NOVO PEDIDO - REIS PIZZARIA*%0A*Cliente:* ${document.getElementById('c-nome').value}%0A*Método:* ${mEnvio.toUpperCase()}%0A*Pizza:* ${pedido.tamanho.toUpperCase()}%0A*Sabores:* ${pedido.sabores.join(' / ')}%0A`;
+    let msg = `*NOVO PEDIDO - REIS PIZZARIA*%0A*Cliente:* ${document.getElementById('c-nome').value}%0A*Método:* ${mEnvio.toUpperCase()}%0A*Pizza:* ${pedido.tamanho.toUpperCase()}%0A*Sabores:* ${pedido.sabores.map(s=>s.nome).join(' / ')}%0A`;
+    if(pedido.extraPremium > 0) msg += `*Adicional Premium:* R$ ${pedido.extraPremium.toFixed(2)}%0A`;
     if(pedido.borda) msg += `*Borda:* ${pedido.borda.nome}%0A`;
     if(pedido.bebidas.length > 0) msg += `*Bebidas:* ${pedido.bebidas.map(b => b.nome).join(', ')}%0A`;
-    if(pedido.cupomAtivo) msg += `*Cupom:* ${pedido.cupomAtivo}%0A`;
     msg += `*Pagamento:* ${document.getElementById('select-pag').value}${troco ? ' (Troco p/ R$ ' + troco + ')' : ''}%0A*TOTAL:* R$ ${pedido.total.toFixed(2)}`;
     window.open(`https://wa.me/5545999683117?text=${msg}`);
 }
