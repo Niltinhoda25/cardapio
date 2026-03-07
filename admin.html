@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { background: #050505; color: #fff; font-family: 'Montserrat', sans-serif; }
         .box { background: #111113; border: 1px solid #27272a; border-radius: 20px; padding: 20px; height: 100%; }
@@ -14,20 +15,29 @@
         .btn-add { color: #fff; font-weight: 900; padding: 10px; border-radius: 10px; width: 100%; text-transform: uppercase; font-size: 10px; margin-top: 10px; }
         h4 { font-size: 11px; font-weight: 900; color: #fbbf24; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #27272a; padding-bottom: 5px; }
         .status-badge { font-size: 8px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+        #login-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-7xl mx-auto">
+    <div id="login-screen">
+        <div class="bg-zinc-900 p-8 rounded-[2rem] border border-white/10 w-full max-w-sm shadow-2xl">
+            <h2 class="text-2xl font-black text-yellow-500 italic text-center mb-6 uppercase">ACESSO REIS 👑</h2>
+            <input type="email" id="login-email" class="input-adm mb-3 h-12" placeholder="Email do Administrador">
+            <input type="password" id="login-pass" class="input-adm mb-6 h-12" placeholder="Senha Secreta">
+            <button onclick="fazerLogin()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase italic hover:bg-yellow-400 transition-all">Entrar no Painel</button>
+            <p id="login-erro" class="text-red-500 text-[10px] font-bold mt-4 text-center hidden">ACESSO NEGADO! Verifique os dados.</p>
+        </div>
+    </div>
+
+    <div id="painel-conteudo" class="max-w-7xl mx-auto hidden">
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-zinc-900 p-6 rounded-3xl border border-white/5 gap-4">
             <div>
                 <h1 class="text-3xl font-black text-yellow-500 uppercase italic">REIS MASTER 👑</h1>
-                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Controle Total</p>
+                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Painel de Controle</p>
             </div>
-            <div class="flex gap-6">
-                <div class="text-center"><p class="text-[8px] text-zinc-500 uppercase">Visitas</p><h2 id="ana-visitas" class="text-2xl font-black text-blue-500">0</h2></div>
-                <div class="text-center"><p class="text-[8px] text-zinc-500 uppercase">Cliques</p><h2 id="ana-cliques" class="text-2xl font-black text-green-500">0</h2></div>
-            </div>
+            <button onclick="location.reload()" class="bg-red-600/10 text-red-500 border border-red-600/20 px-4 py-2 rounded-lg text-[10px] font-black">SAIR</button>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
@@ -65,43 +75,22 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="box border-l-4 border-red-600">
-                <h4>📢 Promoção Banner</h4>
-                <input type="text" id="p-txt" class="input-adm mb-2" placeholder="Texto">
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="text" id="p-in" class="input-adm" placeholder="Início">
-                    <input type="text" id="p-out" class="input-adm" placeholder="Fim">
-                </div>
-                <input type="color" id="p-cor" class="w-full h-10 rounded mb-2 bg-transparent border border-zinc-800">
-                <button onclick="setPromo(true)" class="w-full bg-green-600 py-3 rounded-xl font-black text-[10px] uppercase">Ativar</button>
-            </div>
-
-            <div class="box border-l-4 border-purple-600">
-                <h4>🎫 Cupons</h4>
-                <input type="text" id="c-nome" class="input-adm mb-2" placeholder="Nome">
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="number" id="c-valor" class="input-adm" placeholder="R$">
-                    <input type="number" id="c-limite" class="input-adm" placeholder="Limite">
-                </div>
-                <button onclick="criarCupom()" class="w-full bg-purple-600 py-3 rounded-xl font-black text-[10px] uppercase">Criar Cupom</button>
-            </div>
-
             <div class="box border-l-4 border-yellow-500">
                 <h4>⚙️ Configurações</h4>
                 <div class="grid grid-cols-3 gap-2 mb-2">
-                    <input type="number" id="v-p" class="input-adm" placeholder="Preço P">
-                    <input type="number" id="v-m" class="input-adm" placeholder="Preço M">
-                    <input type="number" id="v-g" class="input-adm" placeholder="Preço G">
+                    <input type="number" id="v-p" class="input-adm" placeholder="P">
+                    <input type="number" id="v-m" class="input-adm" placeholder="M">
+                    <input type="number" id="v-g" class="input-adm" placeholder="G">
                 </div>
                 <input type="number" id="v-taxa" class="input-adm mb-2" placeholder="Taxa Entrega">
-                <button onclick="salvarConfig()" class="w-full bg-yellow-500 text-black py-3 rounded-xl font-black text-xs uppercase mb-2">Salvar</button>
+                <button onclick="salvarConfig()" class="w-full bg-yellow-500 text-black py-3 rounded-xl font-black text-xs uppercase mb-2">Salvar Preços</button>
                 <button id="btn-loja" onclick="toggleLoja()" class="w-full py-3 rounded-xl font-black text-xs uppercase text-white"></button>
             </div>
-        </div>
-
-        <div class="box">
-            <h4>📋 Gerenciar Cardápio</h4>
-            <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            
+            <div class="box col-span-2">
+                <h4>📋 Gerenciar Itens</h4>
+                <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto"></div>
+            </div>
         </div>
     </div>
 
@@ -117,14 +106,28 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        function admInit() {
-            db.collection('analytics').doc('geral').onSnapshot(doc => {
-                if(doc.exists) {
-                    document.getElementById('ana-visitas').innerText = doc.data().visitas;
-                    document.getElementById('ana-cliques').innerText = doc.data().cliques;
-                }
-            });
+        // CONFIGURAÇÃO DE ACESSO
+        const ACESSO = {
+            email: "admin@reispizzaria.com",
+            pass: "reis123"
+        };
 
+        function fazerLogin() {
+            const e = document.getElementById('login-email').value;
+            const p = document.getElementById('login-pass').value;
+
+            if(e === ACESSO.email && p === ACESSO.pass) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('painel-conteudo').classList.remove('hidden');
+                admInit(); // Carrega os dados só depois do login
+            } else {
+                const erro = document.getElementById('login-erro');
+                erro.classList.remove('hidden');
+                setTimeout(() => erro.classList.add('hidden'), 3000);
+            }
+        }
+
+        function admInit() {
             db.collection('config').doc('precos').get().then(doc => {
                 if(doc.exists) {
                     document.getElementById('v-p').value = doc.data().p;
@@ -153,7 +156,7 @@
                         <div class="bg-black/40 p-4 rounded-xl border ${status ? 'border-zinc-800' : 'border-red-900/50 opacity-60'} flex justify-between items-center">
                             <div>
                                 <p class="text-[9px] font-black uppercase text-zinc-500">${i.tipo}</p>
-                                <p class="text-xs font-bold uppercase">${i.nome} ${i.preco > 0 ? '(R$ '+i.preco.toFixed(2)+')' : ''}</p>
+                                <p class="text-xs font-bold uppercase">${i.nome} ${i.preco > 0 ? '(+R$ '+i.preco.toFixed(2)+')' : ''}</p>
                             </div>
                             <div class="flex gap-2">
                                 <button onclick="toggleItem('${doc.id}', ${status})" class="text-[8px] font-black uppercase p-2 bg-zinc-800 rounded">${status ? 'Pausar' : 'Ativar'}</button>
@@ -178,16 +181,15 @@
         async function salvarConfig() {
             await db.collection('config').doc('precos').set({ p: parseFloat(document.getElementById('v-p').value)||0, m: parseFloat(document.getElementById('v-m').value)||0, g: parseFloat(document.getElementById('v-g').value)||0 });
             await db.collection('config').doc('identidade').set({ taxa: parseFloat(document.getElementById('v-taxa').value)||0 });
-            alert("Salvo!");
+            alert("Configurações Salvas!");
         }
 
         async function toggleItem(id, s) { await db.collection('cardapio').doc(id).update({ disponivel: !s }); }
+        
         async function toggleLoja() {
             const doc = await db.collection('config').doc('geral').get();
             await db.collection('config').doc('geral').set({ aberto: !doc.data().aberto });
         }
-
-        admInit();
     </script>
 </body>
 </html>
