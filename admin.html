@@ -12,8 +12,9 @@
     <style>
         body { background: #000; color: #fff; font-family: 'Montserrat', sans-serif; }
         .box { background: #111113; border: 1px solid #27272a; border-radius: 20px; padding: 15px; }
-        .input-adm { background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; width: 100%; font-size: 11px; }
-        .btn-add { color: #fff; font-weight: 900; padding: 8px; border-radius: 8px; width: 100%; text-transform: uppercase; font-size: 10px; margin-top: 8px; transition: 0.3s; cursor: pointer; }
+        .input-adm { background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; width: 100%; font-size: 11px; outline: none; }
+        .input-adm:focus { border-color: #fbbf24; }
+        .btn-add { color: #fff; font-weight: 900; padding: 8px; border-radius: 8px; width: 100%; text-transform: uppercase; font-size: 10px; margin-top: 8px; cursor: pointer; }
         h4 { font-size: 10px; font-weight: 900; color: #fbbf24; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
     </style>
 </head>
@@ -24,20 +25,17 @@
             <h2 class="text-3xl font-black text-yellow-500 italic mb-2 uppercase">REIS LOGIN 👑</h2>
             <p class="text-[10px] text-zinc-500 font-bold mb-8 uppercase tracking-widest">Painel Administrativo</p>
             
-            <input type="email" id="login-email" class="input-adm mb-3 h-12" placeholder="pizzariareis2026@gmail.com">
-            <input type="password" id="login-pass" class="input-adm mb-6 h-12" placeholder="Sua Senha">
+            <input type="email" id="login-email" class="input-adm mb-3 h-12 text-center" placeholder="E-mail">
+            <input type="password" id="login-pass" class="input-adm mb-6 h-12 text-center" placeholder="Senha">
             
-            <button onclick="fazerLogin()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase hover:bg-yellow-400 transition-all">ENTRAR NO PAINEL</button>
+            <button onclick="fazerLogin()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase hover:bg-yellow-400 transition-all">Entrar</button>
             <p id="login-erro" class="text-red-500 text-[10px] font-bold mt-4 hidden uppercase"></p>
         </div>
     </div>
 
     <div id="painel-conteudo" class="max-w-7xl mx-auto hidden">
         <header class="flex justify-between items-center mb-6 bg-zinc-900 p-5 rounded-3xl border border-white/5">
-            <div>
-                <h1 class="text-2xl font-black text-yellow-500 uppercase italic leading-none">REIS MASTER 👑</h1>
-                <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter">Logado como: pizzariareis2026</span>
-            </div>
+            <h1 class="text-2xl font-black text-yellow-500 uppercase italic">REIS MASTER 👑</h1>
             <button onclick="firebase.auth().signOut()" class="bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase">Sair</button>
         </header>
 
@@ -57,7 +55,7 @@
             <div class="box">
                 <h4>💎 Premium</h4>
                 <input type="text" id="pr-nome" class="input-adm mb-2" placeholder="Nome">
-                <input type="number" id="pr-preco" class="input-adm" placeholder="Adicional R$">
+                <input type="number" id="pr-preco" class="input-adm" placeholder="Extra R$">
                 <button onclick="addProduto('premium', 'pr')" class="btn-add bg-purple-600">Adicionar</button>
             </div>
             <div class="box">
@@ -68,29 +66,49 @@
             </div>
             <div class="box">
                 <h4>🥤 Bebida</h4>
-                <input type="text" id="be-nome" class="input-adm mb-2" placeholder="Ex: Coca 2L">
+                <input type="text" id="be-nome" class="input-adm mb-2" placeholder="Nome">
                 <input type="number" id="be-preco" class="input-adm" placeholder="Preço R$">
                 <button onclick="addProduto('bebida', 'be')" class="btn-add bg-blue-600">Adicionar</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="box border-l-4 border-yellow-500 h-fit">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="box border-red-500/30">
+                <h4 class="text-red-500">📢 Banner de Promoção</h4>
+                <input type="text" id="promo-txt" class="input-adm mb-2" placeholder="Texto da Promo">
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="promo-ini" class="input-adm" placeholder="Início">
+                    <input type="text" id="promo-fim" class="input-adm" placeholder="Fim">
+                </div>
+                <button onclick="salvarPromo()" class="w-full bg-red-600 btn-add">Atualizar Banner</button>
+            </div>
+
+            <div class="box border-purple-500/30">
+                <h4 class="text-purple-500">🎟️ Cupons</h4>
+                <input type="text" id="cp-cod" class="input-adm mb-2" placeholder="CÓDIGO">
+                <div class="flex gap-2 mb-2">
+                    <input type="number" id="cp-val" class="input-adm" placeholder="R$ OFF">
+                    <input type="number" id="cp-lim" class="input-adm" placeholder="Qtd">
+                </div>
+                <button onclick="addCupom()" class="btn-add bg-purple-600">Criar Cupom</button>
+            </div>
+
+            <div class="box border-yellow-500/30">
                 <h4>⚙️ Configurações</h4>
-                <div class="grid grid-cols-3 gap-2 mb-2">
+                <div class="grid grid-cols-3 gap-1 mb-2">
                     <input type="number" id="v-p" class="input-adm" placeholder="P">
                     <input type="number" id="v-m" class="input-adm" placeholder="M">
                     <input type="number" id="v-g" class="input-adm" placeholder="G">
                 </div>
-                <input type="number" id="v-taxa" class="input-adm mb-3" placeholder="Taxa Entrega">
-                <button onclick="salvarPrecos()" class="w-full bg-yellow-500 text-black py-3 rounded-xl font-black text-xs uppercase mb-2">Salvar Preços</button>
-                <button id="btn-loja" onclick="toggleLoja()" class="w-full py-3 rounded-xl font-black text-xs uppercase text-white"></button>
+                <input type="number" id="v-taxa" class="input-adm mb-2" placeholder="Taxa Entrega">
+                <button onclick="salvarConfig()" class="w-full bg-yellow-500 text-black py-2 rounded-lg font-black text-[10px] mb-2">SALVAR PREÇOS</button>
+                <button id="btn-loja" onclick="toggleLoja()" class="w-full py-2 rounded-lg font-black text-[10px]"></button>
             </div>
-            
-            <div class="box col-span-2 overflow-y-auto max-h-[500px]">
-                <h4>📋 Cardápio Atual</h4>
-                <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
-            </div>
+        </div>
+
+        <div class="box">
+            <h4>📋 Itens no Cardápio</h4>
+            <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-3 gap-2 max-h-80 overflow-y-auto pr-2"></div>
         </div>
     </div>
 
@@ -107,7 +125,6 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // MONITOR DE LOGIN
         auth.onAuthStateChanged(user => {
             if (user && user.email === "pizzariareis2026@gmail.com") {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -122,16 +139,14 @@
         function fazerLogin() {
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-pass').value;
-            const erroP = document.getElementById('login-erro');
-
             auth.signInWithEmailAndPassword(email, pass).catch(err => {
+                const erroP = document.getElementById('login-erro');
                 erroP.classList.remove('hidden');
-                erroP.innerText = "ACESSO NEGADO: " + err.message;
+                erroP.innerText = "DADOS INCORRETOS";
             });
         }
 
         function admInit() {
-            // Preços
             db.collection('config').doc('precos').onSnapshot(doc => {
                 if(doc.exists){
                     document.getElementById('v-p').value = doc.data().p;
@@ -139,26 +154,23 @@
                     document.getElementById('v-g').value = doc.data().g;
                 }
             });
-            // Taxa
             db.collection('config').doc('identidade').onSnapshot(doc => {
                 if(doc.exists) document.getElementById('v-taxa').value = doc.data().taxa;
             });
-            // Loja
             db.collection('config').doc('geral').onSnapshot(doc => {
                 const aberto = doc.exists ? doc.data().aberto : false;
                 const btn = document.getElementById('btn-loja');
                 btn.innerText = aberto ? "LOJA ABERTA ✅" : "LOJA FECHADA ❌";
-                btn.className = aberto ? "w-full bg-green-600 py-3 rounded-xl font-black text-xs uppercase" : "w-full bg-red-600 py-3 rounded-xl font-black text-xs uppercase";
+                btn.className = aberto ? "w-full bg-green-600 py-2 rounded-lg font-black text-[10px] uppercase" : "w-full bg-red-600 py-2 rounded-lg font-black text-[10px] uppercase";
             });
-            // Lista Itens
             db.collection('cardapio').orderBy('data','desc').onSnapshot(snap => {
                 const list = document.getElementById('lista-gerenciar');
                 list.innerHTML = snap.docs.map(doc => {
                     const i = doc.data();
                     return `
                     <div class="bg-black/40 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
-                        <span class="text-[10px] font-bold uppercase">${i.nome}</span>
-                        <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="text-red-600 font-black px-2 hover:scale-125 transition-all">✕</button>
+                        <span class="text-[9px] font-bold uppercase">${i.nome}</span>
+                        <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="text-red-600 font-black px-2">✕</button>
                     </div>`;
                 }).join('');
             });
@@ -168,19 +180,15 @@
             const nome = document.getElementById(`${pref}-nome`).value;
             const desc = document.getElementById(`${pref}-desc`) ? document.getElementById(`${pref}-desc`).value : '';
             const preco = document.getElementById(`${pref}-preco`) ? parseFloat(document.getElementById(`${pref}-preco`).value) : 0;
-            if(!nome) return alert("Preencha o nome!");
-            await db.collection('cardapio').add({ nome, tipo, desc, preco, data: new Date(), disponivel: true });
+            if(!nome) return alert("Nome vazio!");
+            await db.collection('cardapio').add({ nome, tipo, desc, preco, data: new Date() });
             document.getElementById(`${pref}-nome`).value = '';
         }
 
-        async function salvarPrecos() {
-            await db.collection('config').doc('precos').set({ 
-                p: parseFloat(document.getElementById('v-p').value), 
-                m: parseFloat(document.getElementById('v-m').value), 
-                g: parseFloat(document.getElementById('v-g').value) 
-            });
+        async function salvarConfig() {
+            await db.collection('config').doc('precos').set({ p: parseFloat(document.getElementById('v-p').value), m: parseFloat(document.getElementById('v-m').value), g: parseFloat(document.getElementById('v-g').value) });
             await db.collection('config').doc('identidade').set({ taxa: parseFloat(document.getElementById('v-taxa').value) });
-            alert("Salvo com sucesso!");
+            alert("Salvo!");
         }
 
         async function toggleLoja() {
