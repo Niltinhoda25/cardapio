@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REIS MASTER | Controle Total</title>
+    <title>REIS MASTER | Controle</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -13,23 +13,22 @@
         body { background: #000; color: #fff; font-family: 'Montserrat', sans-serif; }
         .box { background: #111113; border: 1px solid #27272a; border-radius: 20px; padding: 15px; }
         .input-adm { background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; width: 100%; font-size: 11px; }
-        .btn-add { color: #fff; font-weight: 900; padding: 8px; border-radius: 8px; width: 100%; text-transform: uppercase; font-size: 10px; margin-top: 8px; transition: 0.3s; }
-        .btn-add:hover { filter: brightness(1.2); }
-        h4 { font-size: 10px; font-weight: 900; color: #fbbf24; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+        .btn-add { color: #fff; font-weight: 900; padding: 8px; border-radius: 8px; width: 100%; text-transform: uppercase; font-size: 10px; margin-top: 8px; transition: 0.3s; cursor: pointer; }
+        h4 { font-size: 10px; font-weight: 900; color: #fbbf24; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
     </style>
 </head>
 <body class="p-4 md:p-6">
 
     <div id="login-screen" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center p-6">
-        <div class="bg-zinc-900 p-10 rounded-[2.5rem] border border-white/10 w-full max-w-sm text-center shadow-2xl">
-            <h2 class="text-3xl font-black text-yellow-500 italic mb-2 uppercase">REIS MASTER 👑</h2>
-            <p class="text-[10px] text-zinc-500 font-bold mb-8 uppercase tracking-widest">Acesso Restrito ao Administrador</p>
+        <div class="bg-zinc-900 p-8 rounded-[2.5rem] border border-white/10 w-full max-w-sm text-center shadow-2xl">
+            <h2 class="text-3xl font-black text-yellow-500 italic mb-2 uppercase">REIS LOGIN 👑</h2>
+            <p class="text-[10px] text-zinc-500 font-bold mb-8 uppercase tracking-widest">Painel Administrativo</p>
             
-            <button onclick="loginGoogle()" class="w-full bg-white text-black font-bold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-zinc-200 transition-all">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6">
-                Entrar com Google
-            </button>
-            <p id="login-erro" class="text-red-500 text-[10px] font-bold mt-4 hidden uppercase">Acesso negado para este e-mail!</p>
+            <input type="email" id="login-email" class="input-adm mb-3 h-12" placeholder="pizzariareis2026@gmail.com">
+            <input type="password" id="login-pass" class="input-adm mb-6 h-12" placeholder="Sua Senha">
+            
+            <button onclick="fazerLogin()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase hover:bg-yellow-400 transition-all">ENTRAR NO PAINEL</button>
+            <p id="login-erro" class="text-red-500 text-[10px] font-bold mt-4 hidden uppercase"></p>
         </div>
     </div>
 
@@ -37,84 +36,61 @@
         <header class="flex justify-between items-center mb-6 bg-zinc-900 p-5 rounded-3xl border border-white/5">
             <div>
                 <h1 class="text-2xl font-black text-yellow-500 uppercase italic leading-none">REIS MASTER 👑</h1>
-                <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter">Controle Total do Sistema</span>
+                <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter">Logado como: pizzariareis2026</span>
             </div>
-            <button onclick="logout()" class="bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase">Sair</button>
+            <button onclick="firebase.auth().signOut()" class="bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase">Sair</button>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-            <div class="box border-b-4 border-red-600">
-                <h4>🍕 Pizza Salgada</h4>
+            <div class="box">
+                <h4>🍕 Salgada</h4>
                 <input type="text" id="s-nome" class="input-adm mb-2" placeholder="Nome">
                 <input type="text" id="s-desc" class="input-adm" placeholder="Ingredientes">
                 <button onclick="addProduto('pizza', 's')" class="btn-add bg-red-600">Adicionar</button>
             </div>
-            <div class="box border-b-4 border-pink-600">
-                <h4>🍫 Pizza Doce</h4>
+            <div class="box">
+                <h4>🍫 Doce</h4>
                 <input type="text" id="d-nome" class="input-adm mb-2" placeholder="Nome">
-                <input type="text" id="d-desc" class="input-adm" placeholder="Ex: Chocolate/Morango">
+                <input type="text" id="d-desc" class="input-adm" placeholder="Ingredientes">
                 <button onclick="addProduto('doce', 'd')" class="btn-add bg-pink-600">Adicionar</button>
             </div>
-            <div class="box border-b-4 border-purple-600">
-                <h4>💎 Doce Premium</h4>
+            <div class="box">
+                <h4>💎 Premium</h4>
                 <input type="text" id="pr-nome" class="input-adm mb-2" placeholder="Nome">
                 <input type="number" id="pr-preco" class="input-adm" placeholder="Adicional R$">
                 <button onclick="addProduto('premium', 'pr')" class="btn-add bg-purple-600">Adicionar</button>
             </div>
-            <div class="box border-b-4 border-yellow-600">
-                <h4>🧀 Bordas</h4>
+            <div class="box">
+                <h4>🧀 Borda</h4>
                 <input type="text" id="b-nome" class="input-adm mb-2" placeholder="Sabor">
                 <input type="number" id="b-preco" class="input-adm" placeholder="Preço R$">
                 <button onclick="addProduto('borda', 'b')" class="btn-add bg-yellow-600 text-black">Adicionar</button>
             </div>
-            <div class="box border-b-4 border-blue-600">
-                <h4>🥤 Bebidas</h4>
+            <div class="box">
+                <h4>🥤 Bebida</h4>
                 <input type="text" id="be-nome" class="input-adm mb-2" placeholder="Ex: Coca 2L">
                 <input type="number" id="be-preco" class="input-adm" placeholder="Preço R$">
                 <button onclick="addProduto('bebida', 'be')" class="btn-add bg-blue-600">Adicionar</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-            <div class="box border-red-500/30">
-                <h4 class="text-red-500">📢 Promoção (Banner Topo)</h4>
-                <input type="text" id="promo-texto" class="input-adm mb-2" placeholder="Texto da Promo">
-                <div class="flex gap-2 mb-2">
-                    <input type="text" id="promo-inicio" class="input-adm" placeholder="Início (18:00)">
-                    <input type="text" id="promo-fim" class="input-adm" placeholder="Fim (23:59)">
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="setPromo(true)" class="w-full bg-green-600 btn-add">Ativar</button>
-                    <button onclick="setPromo(false)" class="w-full bg-zinc-700 btn-add">Pausar</button>
-                </div>
-            </div>
-
-            <div class="box border-purple-500/30">
-                <h4 class="text-purple-500">🎟️ Gerenciador de Cupons</h4>
-                <input type="text" id="cupom-cod" class="input-adm mb-2" placeholder="Código (Ex: REIS10)">
-                <div class="flex gap-2 mb-2">
-                    <input type="number" id="cupom-valor" class="input-adm" placeholder="Valor R$">
-                    <input type="number" id="cupom-limite" class="input-adm" placeholder="Limite Usos">
-                </div>
-                <button onclick="addCupom()" class="btn-add bg-purple-600">Criar Cupom</button>
-            </div>
-
-            <div class="box border-yellow-500/30">
-                <h4 class="text-yellow-500">⚙️ Configurações e Preços</h4>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="box border-l-4 border-yellow-500 h-fit">
+                <h4>⚙️ Configurações</h4>
                 <div class="grid grid-cols-3 gap-2 mb-2">
                     <input type="number" id="v-p" class="input-adm" placeholder="P">
                     <input type="number" id="v-m" class="input-adm" placeholder="M">
                     <input type="number" id="v-g" class="input-adm" placeholder="G">
                 </div>
                 <input type="number" id="v-taxa" class="input-adm mb-3" placeholder="Taxa Entrega">
-                <button onclick="salvarPrecos()" class="w-full bg-yellow-500 text-black py-2 rounded-lg font-black text-[10px] uppercase mb-2">Salvar Preços</button>
-                <button id="btn-loja" onclick="toggleLoja()" class="w-full py-2 rounded-lg font-black text-[10px] uppercase"></button>
+                <button onclick="salvarPrecos()" class="w-full bg-yellow-500 text-black py-3 rounded-xl font-black text-xs uppercase mb-2">Salvar Preços</button>
+                <button id="btn-loja" onclick="toggleLoja()" class="w-full py-3 rounded-xl font-black text-xs uppercase text-white"></button>
             </div>
-        </div>
-
-        <div class="box">
-            <h4 class="text-zinc-400">📋 Gerenciar Itens Cadastrados</h4>
-            <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-4"></div>
+            
+            <div class="box col-span-2 overflow-y-auto max-h-[500px]">
+                <h4>📋 Cardápio Atual</h4>
+                <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+            </div>
         </div>
     </div>
 
@@ -131,68 +107,58 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // LISTA DE EMAILS AUTORIZADOS
-        const EMAILS_ADMS = ["devd64400@gmail.com", "pizzariareis2026@gmail.com"];
-
-        // FUNÇÃO LOGIN GOOGLE
-        function loginGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(err => alert("Erro ao logar: " + err.message));
-        }
-
-        function logout() { auth.signOut(); }
-
-        // MONITOR DE USUÁRIO
+        // MONITOR DE LOGIN
         auth.onAuthStateChanged(user => {
-            if (user && EMAILS_ADMS.includes(user.email)) {
+            if (user && user.email === "pizzariareis2026@gmail.com") {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('painel-conteudo').classList.remove('hidden');
                 admInit();
-            } else if (user) {
-                auth.signOut();
-                document.getElementById('login-erro').classList.remove('hidden');
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('painel-conteudo').classList.add('hidden');
             }
         });
 
+        function fazerLogin() {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const erroP = document.getElementById('login-erro');
+
+            auth.signInWithEmailAndPassword(email, pass).catch(err => {
+                erroP.classList.remove('hidden');
+                erroP.innerText = "ACESSO NEGADO: " + err.message;
+            });
+        }
+
         function admInit() {
-            // Carrega Preços
+            // Preços
             db.collection('config').doc('precos').onSnapshot(doc => {
-                if(doc.exists) {
+                if(doc.exists){
                     document.getElementById('v-p').value = doc.data().p;
                     document.getElementById('v-m').value = doc.data().m;
                     document.getElementById('v-g').value = doc.data().g;
                 }
             });
-
-            // Carrega Taxa e Loja
-            db.collection('config').doc('geral').onSnapshot(doc => {
-                if(doc.exists) {
-                    const aberto = doc.data().aberto;
-                    const btn = document.getElementById('btn-loja');
-                    btn.innerText = aberto ? "Loja Aberta ✅" : "Loja Fechada ❌";
-                    btn.className = aberto ? "w-full bg-green-600 py-2 rounded-lg font-black text-[10px] text-white uppercase" : "w-full bg-red-600 py-2 rounded-lg font-black text-[10px] text-white uppercase";
-                }
+            // Taxa
+            db.collection('config').doc('identidade').onSnapshot(doc => {
+                if(doc.exists) document.getElementById('v-taxa').value = doc.data().taxa;
             });
-
-            // Carrega Cardápio
+            // Loja
+            db.collection('config').doc('geral').onSnapshot(doc => {
+                const aberto = doc.exists ? doc.data().aberto : false;
+                const btn = document.getElementById('btn-loja');
+                btn.innerText = aberto ? "LOJA ABERTA ✅" : "LOJA FECHADA ❌";
+                btn.className = aberto ? "w-full bg-green-600 py-3 rounded-xl font-black text-xs uppercase" : "w-full bg-red-600 py-3 rounded-xl font-black text-xs uppercase";
+            });
+            // Lista Itens
             db.collection('cardapio').orderBy('data','desc').onSnapshot(snap => {
                 const list = document.getElementById('lista-gerenciar');
                 list.innerHTML = snap.docs.map(doc => {
                     const i = doc.data();
-                    const status = i.disponivel !== false;
                     return `
-                    <div class="bg-black/50 p-3 rounded-xl border border-white/5 flex justify-between items-center">
-                        <div>
-                            <p class="text-[7px] font-black uppercase text-zinc-500">${i.tipo}</p>
-                            <p class="text-[10px] font-bold uppercase">${i.nome}</p>
-                        </div>
-                        <div class="flex gap-1">
-                            <button onclick="toggleItem('${doc.id}', ${status})" class="bg-zinc-800 text-[8px] p-1 rounded font-bold">${status ? 'PAUSAR' : 'ATIVAR'}</button>
-                            <button onclick="deletar('${doc.id}')" class="text-red-600 font-bold p-1">✕</button>
-                        </div>
+                    <div class="bg-black/40 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
+                        <span class="text-[10px] font-bold uppercase">${i.nome}</span>
+                        <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="text-red-600 font-black px-2 hover:scale-125 transition-all">✕</button>
                     </div>`;
                 }).join('');
             });
@@ -213,16 +179,14 @@
                 m: parseFloat(document.getElementById('v-m').value), 
                 g: parseFloat(document.getElementById('v-g').value) 
             });
-            alert("Preços salvos!");
+            await db.collection('config').doc('identidade').set({ taxa: parseFloat(document.getElementById('v-taxa').value) });
+            alert("Salvo com sucesso!");
         }
 
         async function toggleLoja() {
             const doc = await db.collection('config').doc('geral').get();
-            await db.collection('config').doc('geral').update({ aberto: !doc.data().aberto });
+            await db.collection('config').doc('geral').set({ aberto: !doc.data().aberto });
         }
-
-        function deletar(id) { if(confirm("Apagar item?")) db.collection('cardapio').doc(id).delete(); }
-        function toggleItem(id, s) { db.collection('cardapio').doc(id).update({ disponivel: !s }); }
     </script>
 </body>
 </html>
