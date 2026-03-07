@@ -5,39 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADM MASTER | Reis Pizzaria</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { background: #050505; color: #fff; font-family: 'Montserrat', sans-serif; }
-        .box { background: #111113; border: 1px solid #27272a; border-radius: 20px; padding: 20px; height: 100%; }
+        .box { background: #111113; border: 1px solid #27272a; border-radius: 20px; padding: 20px; }
         .input-adm { background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 10px; width: 100%; font-size: 12px; }
         .btn-add { color: #fff; font-weight: 900; padding: 10px; border-radius: 10px; width: 100%; text-transform: uppercase; font-size: 10px; margin-top: 10px; }
         h4 { font-size: 11px; font-weight: 900; color: #fbbf24; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #27272a; padding-bottom: 5px; }
-        .status-badge { font-size: 8px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
-        #login-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div id="login-screen">
-        <div class="bg-zinc-900 p-8 rounded-[2rem] border border-white/10 w-full max-w-sm shadow-2xl">
-            <h2 class="text-2xl font-black text-yellow-500 italic text-center mb-6 uppercase">ACESSO REIS 👑</h2>
-            <input type="email" id="login-email" class="input-adm mb-3 h-12" placeholder="Email do Administrador">
-            <input type="password" id="login-pass" class="input-adm mb-6 h-12" placeholder="Senha Secreta">
-            <button onclick="fazerLogin()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase italic hover:bg-yellow-400 transition-all">Entrar no Painel</button>
-            <p id="login-erro" class="text-red-500 text-[10px] font-bold mt-4 text-center hidden">ACESSO NEGADO! Verifique os dados.</p>
-        </div>
-    </div>
-
-    <div id="painel-conteudo" class="max-w-7xl mx-auto hidden">
+    <div id="painel-conteudo" class="max-w-7xl mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-zinc-900 p-6 rounded-3xl border border-white/5 gap-4">
             <div>
                 <h1 class="text-3xl font-black text-yellow-500 uppercase italic">REIS MASTER 👑</h1>
-                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Painel de Controle</p>
+                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Painel de Controle Oficial</p>
             </div>
-            <button onclick="location.reload()" class="bg-red-600/10 text-red-500 border border-red-600/20 px-4 py-2 rounded-lg text-[10px] font-black">SAIR</button>
+            <button onclick="firebase.auth().signOut()" class="bg-red-600 text-white px-6 py-2 rounded-lg text-[10px] font-black uppercase">SAIR</button>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
@@ -56,8 +44,7 @@
             <div class="box border-purple-900/50">
                 <h4>💎 Premium</h4>
                 <input type="text" id="pr-nome" class="input-adm mb-2" placeholder="Nome">
-                <input type="number" id="pr-preco" class="input-adm mb-2" placeholder="Preço ADICIONAL R$">
-                <input type="text" id="pr-desc" class="input-adm" placeholder="Ingredientes">
+                <input type="number" id="pr-preco" class="input-adm" placeholder="Adicional R$">
                 <button onclick="addProduto('premium', 'pr')" class="btn-add bg-purple-600">Adicionar</button>
             </div>
             <div class="box">
@@ -68,14 +55,14 @@
             </div>
             <div class="box">
                 <h4>🥤 Bebidas</h4>
-                <input type="text" id="be-nome" class="input-adm mb-2" placeholder="Ex: Coca 2L">
+                <input type="text" id="be-nome" class="input-adm mb-2" placeholder="Nome">
                 <input type="number" id="be-preco" class="input-adm" placeholder="Preço R$">
                 <button onclick="addProduto('bebida', 'be')" class="btn-add bg-blue-600">Adicionar</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="box border-l-4 border-yellow-500">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="box border-l-4 border-yellow-500 h-fit">
                 <h4>⚙️ Configurações</h4>
                 <div class="grid grid-cols-3 gap-2 mb-2">
                     <input type="number" id="v-p" class="input-adm" placeholder="P">
@@ -88,8 +75,8 @@
             </div>
             
             <div class="box col-span-2">
-                <h4>📋 Gerenciar Itens</h4>
-                <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto"></div>
+                <h4>📋 Itens Cadastrados</h4>
+                <div id="lista-gerenciar" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2"></div>
             </div>
         </div>
     </div>
@@ -106,29 +93,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // CONFIGURAÇÃO DE ACESSO
-        const ACESSO = {
-            email: "admin@reispizzaria.com",
-            pass: "reis123"
-        };
-
-        function fazerLogin() {
-            const e = document.getElementById('login-email').value;
-            const p = document.getElementById('login-pass').value;
-
-            if(e === ACESSO.email && p === ACESSO.pass) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('painel-conteudo').classList.remove('hidden');
-                admInit(); // Carrega os dados só depois do login
-            } else {
-                const erro = document.getElementById('login-erro');
-                erro.classList.remove('hidden');
-                setTimeout(() => erro.classList.add('hidden'), 3000);
-            }
-        }
+        // Só carrega se estiver logado
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) { admInit(); } else { window.location.href = 'login.html'; } 
+        });
 
         function admInit() {
-            db.collection('config').doc('precos').get().then(doc => {
+            db.collection('config').doc('precos').onSnapshot(doc => {
                 if(doc.exists) {
                     document.getElementById('v-p').value = doc.data().p;
                     document.getElementById('v-m').value = doc.data().m;
@@ -136,14 +107,14 @@
                 }
             });
 
-            db.collection('config').doc('identidade').get().then(doc => {
+            db.collection('config').doc('identidade').onSnapshot(doc => {
                 if(doc.exists) document.getElementById('v-taxa').value = doc.data().taxa;
             });
 
             db.collection('config').doc('geral').onSnapshot(doc => {
                 const aberto = doc.exists ? doc.data().aberto : false;
                 const btn = document.getElementById('btn-loja');
-                btn.innerText = aberto ? "LOJA ABERTA" : "LOJA FECHADA";
+                btn.innerText = aberto ? "LOJA ABERTA ✅" : "LOJA FECHADA ❌";
                 btn.className = aberto ? "w-full bg-green-600 py-3 rounded-xl font-black text-xs uppercase" : "w-full bg-red-600 py-3 rounded-xl font-black text-xs uppercase";
             });
 
@@ -151,17 +122,13 @@
                 const list = document.getElementById('lista-gerenciar');
                 list.innerHTML = snap.docs.map(doc => {
                     const i = doc.data();
-                    const status = i.disponivel !== false;
                     return `
-                        <div class="bg-black/40 p-4 rounded-xl border ${status ? 'border-zinc-800' : 'border-red-900/50 opacity-60'} flex justify-between items-center">
+                        <div class="bg-black/40 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
                             <div>
-                                <p class="text-[9px] font-black uppercase text-zinc-500">${i.tipo}</p>
-                                <p class="text-xs font-bold uppercase">${i.nome} ${i.preco > 0 ? '(+R$ '+i.preco.toFixed(2)+')' : ''}</p>
+                                <p class="text-[8px] font-black uppercase text-zinc-500">${i.tipo}</p>
+                                <p class="text-[10px] font-bold uppercase">${i.nome} ${i.preco > 0 ? '(+R$'+i.preco+')' : ''}</p>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="toggleItem('${doc.id}', ${status})" class="text-[8px] font-black uppercase p-2 bg-zinc-800 rounded">${status ? 'Pausar' : 'Ativar'}</button>
-                                <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="text-red-600 font-black p-2">✕</button>
-                            </div>
+                            <button onclick="db.collection('cardapio').doc('${doc.id}').delete()" class="text-red-600 font-black p-2">✕</button>
                         </div>`;
                 }).join('');
             });
@@ -171,21 +138,17 @@
             const nome = document.getElementById(`${pref}-nome`).value;
             const desc = document.getElementById(`${pref}-desc`) ? document.getElementById(`${pref}-desc`).value : '';
             const preco = document.getElementById(`${pref}-preco`) ? parseFloat(document.getElementById(`${pref}-preco`).value) : 0;
-            if(!nome) return alert("Preencha o nome!");
+            if(!nome) return alert("Nome obrigatório!");
             await db.collection('cardapio').add({ nome, tipo, desc, preco, data: new Date(), disponivel: true });
             document.getElementById(`${pref}-nome`).value = '';
-            if(document.getElementById(`${pref}-desc`)) document.getElementById(`${pref}-desc`).value = '';
-            if(document.getElementById(`${pref}-preco`)) document.getElementById(`${pref}-preco`).value = '';
         }
 
         async function salvarConfig() {
-            await db.collection('config').doc('precos').set({ p: parseFloat(document.getElementById('v-p').value)||0, m: parseFloat(document.getElementById('v-m').value)||0, g: parseFloat(document.getElementById('v-g').value)||0 });
-            await db.collection('config').doc('identidade').set({ taxa: parseFloat(document.getElementById('v-taxa').value)||0 });
-            alert("Configurações Salvas!");
+            await db.collection('config').doc('precos').set({ p: parseFloat(document.getElementById('v-p').value), m: parseFloat(document.getElementById('v-m').value), g: parseFloat(document.getElementById('v-g').value) });
+            await db.collection('config').doc('identidade').set({ taxa: parseFloat(document.getElementById('v-taxa').value) });
+            alert("Salvo!");
         }
 
-        async function toggleItem(id, s) { await db.collection('cardapio').doc(id).update({ disponivel: !s }); }
-        
         async function toggleLoja() {
             const doc = await db.collection('config').doc('geral').get();
             await db.collection('config').doc('geral').set({ aberto: !doc.data().aberto });
