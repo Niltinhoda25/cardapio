@@ -199,7 +199,7 @@ async function cliqueFinalizar() {
     if(pedido.borda) msg += `*Borda:* ${pedido.borda.nome}%0A`;
     if(pedido.bebidas.length > 0) msg += `*Bebidas:* ${pedido.bebidas.map(b => b.nome).join(', ')}%0A`;
     msg += `*Pagamento:* ${document.getElementById('select-pag').value}${troco ? ' (Troco p/ R$ ' + troco + ')' : ''}%0A*TOTAL:* R$ ${pedido.total.toFixed(2)}`;
-    window.open(`https://wa.me/5545999683117?text=${msg}`);
+    window.open(`https://wa.me/554598484281?text=${msg}`);
 }
 
 window.onload = init;
